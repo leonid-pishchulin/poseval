@@ -329,6 +329,11 @@ def load_data_dir(argv):
     gt = data["annolist"]
     for imgidx in range(len(gt)):
         gt[imgidx]["seq_id"] = i
+        for ridxGT in range(len(gt[imgidx]["annorect"])):
+            if ("track_id" in gt[imgidx]["annorect"][ridxGT].keys()):
+                # adjust track_ids to make them unique across all sequences
+                assert(gt[imgidx]["annorect"][ridxGT]["track_id"][0] < 100)
+                gt[imgidx]["annorect"][ridxGT]["track_id"][0] += i*100
     gtFramesAll += gt
     gtBasename = os.path.basename(filenames[i])
     predFilename = pred_dir + gtBasename
@@ -342,6 +347,12 @@ def load_data_dir(argv):
     pr = data["annolist"]
     if (len(pr) <> len(gt)):
         raise Exception('# prediction frames %d <> # GT frames %d for %s' % (len(pr),len(gt),predFilename))
+    for imgidx in range(len(pr)):
+        for ridxPr in range(len(pr[imgidx]["annorect"])):
+            if ("track_id" in pr[imgidx]["annorect"][ridxPr].keys()):
+                # adjust track_ids to make them unique across all sequences
+                assert(pr[imgidx]["annorect"][ridxPr]["track_id"][0] < 100)
+                pr[imgidx]["annorect"][ridxPr]["track_id"][0] += i*100
     prFramesAll += pr
 
   gtFramesAll,prFramesAll = cleanupData(gtFramesAll,prFramesAll)

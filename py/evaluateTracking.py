@@ -5,7 +5,7 @@ import sys
 
 import eval_helpers
 from eval_helpers import Joint
-sys.path.append('../../../py-motmetrics/')
+sys.path.append('../../py-motmetrics/')
 import motmetrics as mm
 
 
@@ -31,7 +31,10 @@ def computeMetrics(gtFramesAll, motAll):
 
     imgidxfirst = 0
     # iterate over tracking sequences
-    # seqidxsUniq = seqidxsUniq[:1]
+    # seqidxsUniq = seqidxsUniq[:20]
+    accAll = {}
+    for i in range(nJoints):
+        accAll[i] = mm.MOTAccumulator(auto_id=True)
     nSeq = len(seqidxsUniq)
     for si in range(nSeq):
         print "seqidx: %d/%d" % (si+1,nSeq)
@@ -41,9 +44,6 @@ def computeMetrics(gtFramesAll, motAll):
         print "DEBUG: remove last frame from eval until annotations are fixed"
         imgidxs = imgidxs[:-1].copy()
         # create an accumulator that will be updated during each frame
-        accAll = {}
-        for i in range(nJoints):
-            accAll[i] = mm.MOTAccumulator(auto_id=True)
         # iterate over frames
         for j in range(len(imgidxs)):
             imgidx = imgidxs[j,0]
@@ -63,20 +63,13 @@ def computeMetrics(gtFramesAll, motAll):
                     dist                        # Distances from objects to hypotheses
                 )
 
-        # compute metrics per joint per sequence
-        for i in range(nJoints):
-            summary = mh.compute(accAll[i], metrics=['num_frames', 'mota', 'motp', 'precision', 'recall'], return_dataframe=False, name='acc')
-            metricsAll['mota'][0,i] += summary['mota']*100
-            metricsAll['motp'][0,i] += (1-summary['motp'])*100
-            metricsAll['pre'][0,i]  += summary['precision']*100
-            metricsAll['rec'][0,i]  += summary['recall']*100
-
-    # average metrics per joint over all sequences
+    # compute metrics per joint for all sequences
     for i in range(nJoints):
-        metricsAll['mota'][0,i] /= nSeq
-        metricsAll['motp'][0,i] /= nSeq
-        metricsAll['pre'][0,i]  /= nSeq
-        metricsAll['rec'][0,i]  /= nSeq
+        summary = mh.compute(accAll[i], metrics=['num_frames', 'mota', 'motp', 'precision', 'recall'], return_dataframe=False, name='acc')
+        metricsAll['mota'][0,i] += summary['mota']*100
+        metricsAll['motp'][0,i] += (1-summary['motp'])*100
+        metricsAll['pre'][0,i]  += summary['precision']*100
+        metricsAll['rec'][0,i]  += summary['recall']*100
 
     # average metrics over all joints over all sequences
     metricsAll['mota'][0,nJoints] = metricsAll['mota'][0,:nJoints].mean()
