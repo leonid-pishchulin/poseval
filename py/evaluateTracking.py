@@ -5,7 +5,6 @@ import sys
 
 import eval_helpers
 from eval_helpers import Joint
-sys.path.append('../../py-motmetrics/')
 import motmetrics as mm
 
 
@@ -21,23 +20,38 @@ def computeMetrics(gtFramesAll, motAll):
 
     seqidxsUniq = np.unique(seqidxs)
 
-    mh = mm.metrics.create()
+    # intermediate metrics
+    metricsMidNames = ['num_misses', 'num_switches', 'num_false_positives', 'num_objects', 'num_detections']
 
-    metricsAll = {}
-    metricsAll['mota'] = np.zeros([1,nJoints+1])
-    metricsAll['motp'] = np.zeros([1,nJoints+1])
-    metricsAll['pre']  = np.zeros([1,nJoints+1])
-    metricsAll['rec']  = np.zeros([1,nJoints+1])
+    # final metrics computed from intermediate metrics
+    metricsFinNames = ['mota','motp','pre','rec']
+
+    # initialize intermediate metrics
+    metricsMidAll = {}
+    for name in metricsMidNames:
+        metricsMidAll[name] = np.zeros([1,nJoints])
+    metricsMidAll['sumD'] = np.zeros([1,nJoints])
+
+    # initialize final metrics
+    metricsFinAll = {}
+    for name in metricsFinNames:
+        metricsFinAll[name] = np.zeros([1,nJoints+1])
+
+    # create metrics
+    mh = mm.metrics.create()
 
     imgidxfirst = 0
     # iterate over tracking sequences
     # seqidxsUniq = seqidxsUniq[:20]
-    accAll = {}
-    for i in range(nJoints):
-        accAll[i] = mm.MOTAccumulator(auto_id=True)
     nSeq = len(seqidxsUniq)
     for si in range(nSeq):
         print "seqidx: %d/%d" % (si+1,nSeq)
+
+        # init per-joint metrics accumulator
+        accAll = {}
+        for i in range(nJoints):
+            accAll[i] = mm.MOTAccumulator(auto_id=True)
+
         # extract frames IDs for the sequence
         imgidxs = np.argwhere(seqidxs == seqidxsUniq[si])
         # DEBUG: remove the last frame of each sequence from evaluation due to buggy annotations
@@ -63,21 +77,34 @@ def computeMetrics(gtFramesAll, motAll):
                     dist                        # Distances from objects to hypotheses
                 )
 
-    # compute metrics per joint for all sequences
+        # compute intermediate metrics per joint per sequence
+        for i in range(nJoints):
+            metricsMid = mh.compute(accAll[i], metrics=metricsMidNames, return_dataframe=False, name='acc')
+            for name in metricsMidNames:
+                metricsMidAll[name][0,i] += metricsMid[name]
+            metricsMidAll['sumD'][0,i] += accAll[i].events['D'].sum()
+
+    # compute final metrics per joint for all sequences
     for i in range(nJoints):
-        summary = mh.compute(accAll[i], metrics=['num_frames', 'mota', 'motp', 'precision', 'recall'], return_dataframe=False, name='acc')
-        metricsAll['mota'][0,i] += summary['mota']*100
-        metricsAll['motp'][0,i] += (1-summary['motp'])*100
-        metricsAll['pre'][0,i]  += summary['precision']*100
-        metricsAll['rec'][0,i]  += summary['recall']*100
+        metricsFinAll['mota'][0,i] = 100*(1. - (metricsMidAll['num_misses'][0,i] +
+                                                metricsMidAll['num_switches'][0,i] +
+                                                metricsMidAll['num_false_positives'][0,i]) /
+                                                metricsMidAll['num_objects'][0,i])
+        metricsFinAll['motp'][0,i] = 100*(1. - (metricsMidAll['sumD'][0,i] /
+                                                metricsMidAll['num_detections'][0,i]))
+        metricsFinAll['pre'][0,i]  = 100*(metricsMidAll['num_detections'][0,i] /
+                                       (metricsMidAll['num_detections'][0,i] +
+                                        metricsMidAll['num_false_positives'][0,i]))
+        metricsFinAll['rec'][0,i]  = 100*(metricsMidAll['num_detections'][0,i] /
+                                       metricsMidAll['num_objects'][0,i])
 
     # average metrics over all joints over all sequences
-    metricsAll['mota'][0,nJoints] = metricsAll['mota'][0,:nJoints].mean()
-    metricsAll['motp'][0,nJoints] = metricsAll['motp'][0,:nJoints].mean()
-    metricsAll['pre'][0,nJoints]  = metricsAll['pre'] [0,:nJoints].mean()
-    metricsAll['rec'][0,nJoints]  = metricsAll['rec'] [0,:nJoints].mean()
+    metricsFinAll['mota'][0,nJoints] = metricsFinAll['mota'][0,:nJoints].mean()
+    metricsFinAll['motp'][0,nJoints] = metricsFinAll['motp'][0,:nJoints].mean()
+    metricsFinAll['pre'][0,nJoints]  = metricsFinAll['pre'] [0,:nJoints].mean()
+    metricsFinAll['rec'][0,nJoints]  = metricsFinAll['rec'] [0,:nJoints].mean()
 
-    return metricsAll
+    return metricsFinAll
 
 
 def evaluateTracking(gtFramesAll, prFramesAll):
