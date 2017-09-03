@@ -5,7 +5,7 @@ Created by Leonid Pishchulin
 
 ### Introduction
 
-This readme provides step-by-step instructions how to evaluate predictions on val set of [PoseTrack Dataset](https://posetrack.net) locally on your machine. For evaluation on val and test set using evaluation server, see below.
+This README provides instructions how to evaluate your method's predictions on [PoseTrack Dataset](https://posetrack.net) locally or using evaluation server.
 
 ### Prerequisites
 
@@ -37,7 +37,7 @@ Average Precision (AP) metric is used for evaluation of per-frame multi-person p
 
 #### Video-based pose tracking
 
-Multiple Object Tracking (MOT) metrics [2] are used for evaluation of video-based pose tracking. Our implementation builds on the MOT evaluation code [4] and requires predicted body poses with tracklet IDs as input. First, for each frame, for each body joint class, distances between predicted locations and GT locations are computed. Then, predicted tracklet IDs and GT tracklet IDs are taken into account and all (prediction, GT) pairs with distances not exceeding PCKh [3] threshold are considered during global matching of predicted tracklets to GT tracklets for each particular body joint. Global matching minimizes the total assignment distance. Finally, Multiple Object Tracker Accuracy (MOTA), Multiple Object Tracker Precision (MOTP), Precision and Recall metrics are computed. We report MOTA metric for each body joint class and average over all body joints, while for MOTP, Precision and Recall we report averages only.
+Multiple Object Tracking (MOT) metrics [2] are used for evaluation of video-based pose tracking. Our implementation builds on the MOT evaluation code [4] and requires predicted body poses with tracklet IDs as input. First, for each frame, for each body joint class, distances between predicted locations and GT locations are computed. Then, predicted tracklet IDs and GT tracklet IDs are taken into account and all (prediction, GT) pairs with distances not exceeding PCKh [3] threshold are considered during global matching of predicted tracklets to GT tracklets for each particular body joint. Global matching minimizes the total assignment distance. Finally, Multiple Object Tracker Accuracy (MOTA), Multiple Object Tracker Precision (MOTP), Precision, and Recall metrics are computed. We report MOTA metric for each body joint class and average over all body joints, while for MOTP, Precision, and Recall we report averages only.
 
 ### Evaluation (local)
 
@@ -53,6 +53,16 @@ Evaluation of multi-person pose estimation requires joint detection scores, whil
 
 ### Evaluation (server)
 
-In order to evaluate using evaluation server, zip your directory with json prediction files and submit your results at https://posetrack.net. Shortly you will receive an email containing evaluation results.
+In order to evaluate using evaluation server, zip your directory containing json prediction files and submit at https://posetrack.net. Shortly you will receive an email containing evaluation results.
+
+### References
+
+[1] DeepCut: Joint Subset Partition and Labeling for Multi Person Pose Estimation. L. Pishchulin, E. Insafutdinov, S. Tang, B. Andres, M. Andriluka, P. Gehler, and B. Schiele. In CVPR'16
+
+[2] Evaluating multiple object tracking performance: the CLEAR MOT metrics. K. Bernardin and R. Stiefelhagen. EURASIP J. Image Vide.'08 
+
+[3] 2D Human Pose Estimation: New Benchmark and State of the Art Analysis. M. Andriluka, L. Pishchulin, P. Gehler, and B. Schiele. In CVPR'14
+
+[4] https://github.com/cheind/py-motmetrics
 
 For further questions and details, contact PoseTrack Team <mailto:admin@posetrack.net>
