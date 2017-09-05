@@ -210,12 +210,7 @@ def get_data_dir():
   return dataDir
 
 def help(msg=''):
-  sys.stderr.write(msg +
-        'Usage: python evaluate.py <GT_FILE> <PRED_FILE> [MODE]\n\n'
-        'GT_FILE   denotes path to json file with annotations.\n'
-        'PRED_FILE denotes path to json file with predictions.\n'
-        'MODE <frame|multi> Single-frame or multi-frame (default) evaluation.\n')
-
+  sys.stderr.write(msg+'\n')
   exit()
 
 def process_arguments(argv):
