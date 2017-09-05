@@ -20,7 +20,45 @@ $ cd poseval/py && export PYTHONPATH=$PWD/../py-motmetrics:$PYTHONPATH
 ```
 ### Data preparation
 
-Evaluation requires ground truth (GT) annotations available at [PoseTrack](https://posetrack.net) and  your method's predictions. Both GT annotations and your predictions must be saved in json format. Following GT annotations, predictions must be stored per sequence using the same structure as GT annotations, and have the same filename as GT annotations.
+Evaluation requires ground truth (GT) annotations available at [PoseTrack](https://posetrack.net) and  your method's predictions. Both GT annotations and your predictions must be saved in json format. Following GT annotations, predictions must be stored per sequence using the same structure as GT annotations, and have the same filename as GT annotations. Example of json prediction structure:
+```
+{
+   "annolist": [
+       {
+	   "image": [
+	       {
+		  "name": "images\/bonn_5sec\/000342_mpii\/00000001.jpg"
+	       }
+           ],
+           "annorect": [
+	       {
+	           "x1": [625],
+		   "y1": [94],
+		   "x2": [681],
+		   "y2": [178],
+		   "score": [0.9],
+		   "track_id": [0],
+		   "annopoints": [
+		       {
+			   "point": [
+			       {
+			           "id": [0],
+				   "x": [394],
+				   "y": [173],
+			       },
+			       { ... }
+			   ]
+		       }
+		   ]
+		},
+		{ ... }
+	   ],
+       },
+       { ... }
+   ]
+}
+```
+
 We provide a possibility to convert a Matlab structure into json format.
 ```
 $ cd poseval/matlab

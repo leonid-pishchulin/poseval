@@ -306,7 +306,7 @@ def removeRectsWithoutPoints(rects):
   idxsPr = []
   for ridxPr in range(len(rects)):
     if (("annopoints" in rects[ridxPr].keys()) and
-        (len(rects[ridxPr]["annopoints"]) > 0) and
+        (len(rects[ridxPr]["annopoints"]) > 0 and len(rects[ridxPr]["annopoints"][0]) > 0) and
         ("point" in rects[ridxPr]["annopoints"][0].keys())):
         idxsPr += [ridxPr];
   rects = [rects[ridx] for ridx in idxsPr]
