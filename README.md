@@ -1,4 +1,4 @@
-# Evaluation of Multi-Person Pose Estimation and Tracking on PoseTrack Dataset
+# Evaluation of Multi-Person Pose Estimation and Tracking
 
 Created by Leonid Pishchulin
 
