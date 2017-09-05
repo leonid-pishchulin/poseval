@@ -241,23 +241,25 @@ def process_arguments(argv):
 def process_arguments_server(argv):
   mode = 'multi'
 
-  assert len(argv) == 9, "Wrong number of arguments"
+  print len(argv)
+  assert len(argv) == 10, "Wrong number of arguments"
 
-  mode   = str.lower(argv[3])
   gt_dir = argv[1]
   pred_dir = argv[2]
-  shortname = argv[4]
-  chl = argv[5]
-  shortname_uid = argv[6]
-  shakey = argv[7]
-  timestamp = argv[8]
+  mode   = str.lower(argv[3])
+  evaltrack = argv[4]
+  shortname = argv[5]
+  chl = argv[6]
+  shortname_uid = argv[7]
+  shakey = argv[8]
+  timestamp = argv[9]
   if not os.path.exists(gt_dir):
     help('Given ground truth does not exist!\n')
 
   if not os.path.exists(pred_dir):
     help('Given prediction does not exist!\n')
 
-  return gt_dir, pred_dir, mode, shortname, chl, shortname_uid, shakey, timestamp
+  return gt_dir, pred_dir, mode, evaltrack, shortname, chl, shortname_uid, shakey, timestamp
 
 
 def load_data(argv):
