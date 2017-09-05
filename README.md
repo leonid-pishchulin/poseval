@@ -1,5 +1,5 @@
 Evaluation of Multi-Person Pose Estimation and Tracking on PoseTrack Dataset
-=====================
+1;95;0c=====================
 
 Created by Leonid Pishchulin
 
@@ -84,7 +84,11 @@ Evaluation code has been tested in Linux and Ubuntu OS. Evaluation takes as inpu
 ```
 $ git clone https://github.com/leonid-pishchulin/poseval.git --recursive
 $ cd poseval/py && export PYTHONPATH=$PWD/../py-motmetrics:$PYTHONPATH
-$ python evaluate.py --groundTruth=/path/to/annotations/val/ --predictions=/path/to/predictions --evalPoseTracking --evalPoseEstimation
+$ python evaluate.py \
+  --groundTruth=/path/to/annotations/val/ \
+  --predictions=/path/to/predictions \
+  --evalPoseTracking \
+  --evalPoseEstimation
 ```
 
 Evaluation of multi-person pose estimation requires joint detection scores, while evaluation of pose tracking requires predicted tracklet IDs per pose.
