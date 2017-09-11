@@ -90,8 +90,13 @@ def computeMetrics(gtFramesAll, motAll):
                                                 metricsMidAll['num_switches'][0,i] +
                                                 metricsMidAll['num_false_positives'][0,i]) /
                                                 metricsMidAll['num_objects'][0,i])
-        metricsFinAll['motp'][0,i] = 100*(1. - (metricsMidAll['sumD'][0,i] /
-                                                metricsMidAll['num_detections'][0,i]))
+        numDet = metricsMidAll['num_detections'][0,i]
+        s = metricsMidAll['sumD'][0,i]
+        if (numDet == 0):
+            assert(np.isnan(s))
+            metricsFinAll['motp'][0,i] = 0.0
+        else:
+            metricsFinAll['motp'][0,i] = 100*(1. - (s / numDet))
         metricsFinAll['pre'][0,i]  = 100*(metricsMidAll['num_detections'][0,i] /
                                        (metricsMidAll['num_detections'][0,i] +
                                         metricsMidAll['num_false_positives'][0,i]))
