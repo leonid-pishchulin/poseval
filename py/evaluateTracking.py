@@ -92,8 +92,7 @@ def computeMetrics(gtFramesAll, motAll):
                                                 metricsMidAll['num_objects'][0,i])
         numDet = metricsMidAll['num_detections'][0,i]
         s = metricsMidAll['sumD'][0,i]
-        if (numDet == 0):
-            assert(np.isnan(s))
+        if (numDet == 0 or np.isnan(s)):
             metricsFinAll['motp'][0,i] = 0.0
         else:
             metricsFinAll['motp'][0,i] = 100*(1. - (s / numDet))
