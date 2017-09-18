@@ -1,4 +1,5 @@
 import numpy as np
+from shapely import geometry
 import sys
 import os
 import json
@@ -296,13 +297,67 @@ def cleanupData(gtFramesAll,prFramesAll):
   return gtFramesAll, prFramesAll
 
 
+def removeIgnoredPointsRects(rects,polyList):
+
+    ridxs = list(range(len(rects)))
+    for ridx in range(len(rects)):
+        points = rects[ridx]["annopoints"][0]["point"]
+        pidxs = list(range(len(points)))
+        for pidx in range(len(points)):
+            pt = geometry.Point(points[pidx]["x"][0], points[pidx]["y"][0])
+            bIgnore = False
+            for poidx in range(len(polyList)):
+                poly = polyList[poidx]
+                if (poly.contains(pt)):
+                    bIgnore = True
+                    break
+            if (bIgnore):
+                pidxs.remove(pidx)
+        points = [points[pidx] for pidx in pidxs]
+        if (len(points) > 0):
+            rects[ridx]["annopoints"][0]["point"] = points
+        else:
+            ridxs.remove(ridx)
+    rects = [rects[ridx] for ridx in ridxs]
+    return rects
+
+
+def removeIgnoredPoints(gtFramesAll,prFramesAll):
+
+    imgidxs = []
+    for imgidx in range(len(gtFramesAll)):
+        if ("ignore_regions" in gtFramesAll[imgidx].keys() and
+            len(gtFramesAll[imgidx]["ignore_regions"]) > 0):
+            regions = gtFramesAll[imgidx]["ignore_regions"]
+            polyList = []
+            for ridx in range(len(regions)):
+                points = regions[ridx]["point"]
+                pointList = []
+                for pidx in range(len(points)):
+                    pt = geometry.Point(points[pidx]["x"][0], points[pidx]["y"][0])
+                    pointList += [pt]
+                poly = geometry.Polygon([[p.x, p.y] for p in pointList])
+                polyList += [poly]
+
+            rects = prFramesAll[imgidx]["annorect"]
+            prFramesAll[imgidx]["annorect"] = removeIgnoredPointsRects(rects,polyList)
+            rects = gtFramesAll[imgidx]["annorect"]
+            gtFramesAll[imgidx]["annorect"] = removeIgnoredPointsRects(rects,polyList)
+
+    return gtFramesAll, prFramesAll
+
+
+def rectHasPoints(rect):
+    return (("annopoints" in rect.keys()) and
+            (len(rect["annopoints"]) > 0 and len(rect["annopoints"][0]) > 0) and
+            ("point" in rect["annopoints"][0].keys()))
+
+
 def removeRectsWithoutPoints(rects):
 
   idxsPr = []
   for ridxPr in range(len(rects)):
-    if (("annopoints" in rects[ridxPr].keys()) and
-        (len(rects[ridxPr]["annopoints"]) > 0 and len(rects[ridxPr]["annopoints"][0]) > 0) and
-        ("point" in rects[ridxPr]["annopoints"][0].keys())):
+    if (rectHasPoints(rects[ridxPr])):
         idxsPr += [ridxPr];
   rects = [rects[ridx] for ridx in idxsPr]
   return rects
@@ -353,6 +408,8 @@ def load_data_dir(argv):
     prFramesAll += pr
 
   gtFramesAll,prFramesAll = cleanupData(gtFramesAll,prFramesAll)
+
+  gtFramesAll,prFramesAll = removeIgnoredPoints(gtFramesAll,prFramesAll)
 
   return gtFramesAll, prFramesAll
 

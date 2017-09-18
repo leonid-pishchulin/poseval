@@ -94,7 +94,7 @@ Evaluation of multi-person pose estimation requires joint detection scores, whil
 
 ## Evaluation (server)
 
-In order to evaluate using evaluation server, zip your directory containing json prediction files and submit at https://posetrack.net. Shortly you will receive an email containing evaluation results.
+In order to evaluate using evaluation server, zip your directory containing json prediction files and submit at https://posetrack.net. Shortly you will receive an email containing evaluation results. **Prior to submitting your results to evaluation server, make sure you are able to evaluate locally on val set to avoid issues due to incorrect formatting of predictions.**
 
 ## References
 
