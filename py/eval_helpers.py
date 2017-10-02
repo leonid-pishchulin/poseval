@@ -374,6 +374,7 @@ def load_data_dir(argv):
   gtFramesAll = []
   prFramesAll = []
 
+  MAX_TRACK_ID = 1000
   for i in range(len(filenames)):
     # load each annotation json file
     with open(filenames[i]) as data_file:
@@ -384,8 +385,8 @@ def load_data_dir(argv):
         for ridxGT in range(len(gt[imgidx]["annorect"])):
             if ("track_id" in gt[imgidx]["annorect"][ridxGT].keys()):
                 # adjust track_ids to make them unique across all sequences
-                assert(gt[imgidx]["annorect"][ridxGT]["track_id"][0] < 100)
-                gt[imgidx]["annorect"][ridxGT]["track_id"][0] += i*100
+                assert(gt[imgidx]["annorect"][ridxGT]["track_id"][0] < MAX_TRACK_ID)
+                gt[imgidx]["annorect"][ridxGT]["track_id"][0] += i*MAX_TRACK_ID
     gtFramesAll += gt
     gtBasename = os.path.basename(filenames[i])
     predFilename = pred_dir + gtBasename

@@ -57,6 +57,7 @@ Evaluation requires ground truth (GT) annotations available at [PoseTrack](https
    ]
 }
 ```
+Note: values of `track_id` must integers from the interval [0, 999]. 
 
 We provide a possibility to convert a Matlab structure into json format.
 ```
