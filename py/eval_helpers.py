@@ -404,8 +404,8 @@ def load_data_dir(argv):
         for ridxPr in range(len(pr[imgidx]["annorect"])):
             if ("track_id" in pr[imgidx]["annorect"][ridxPr].keys()):
                 # adjust track_ids to make them unique across all sequences
-                assert(pr[imgidx]["annorect"][ridxPr]["track_id"][0] < 100)
-                pr[imgidx]["annorect"][ridxPr]["track_id"][0] += i*100
+                assert(pr[imgidx]["annorect"][ridxPr]["track_id"][0] < MAX_TRACK_ID)
+                pr[imgidx]["annorect"][ridxPr]["track_id"][0] += i*MAX_TRACK_ID
     prFramesAll += pr
 
   gtFramesAll,prFramesAll = cleanupData(gtFramesAll,prFramesAll)
