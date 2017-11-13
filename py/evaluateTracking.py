@@ -94,7 +94,7 @@ def computeMetrics(gtFramesAll, motAll):
             metricsMidAll['sumD'][0,i] += s
 
             # compute final metrics per sequence
-            metricsSeqAll[si]['mota'][0,i] = 100*(1. - (metricsMid['num_misses'] +
+            metricsSeqAll[si]['mota'][0,i] = 100*(1. - 1.*(metricsMid['num_misses'] +
                                                 metricsMid['num_switches'] +
                                                 metricsMid['num_false_positives']) /
                                                 metricsMid['num_objects'])
@@ -102,11 +102,11 @@ def computeMetrics(gtFramesAll, motAll):
             if (numDet == 0 or np.isnan(s)):
                 metricsSeqAll[si]['motp'][0,i] = 0.0
             else:
-                metricsSeqAll[si]['motp'][0,i] = 100*(1. - (s / numDet))
-            metricsSeqAll[si]['pre'][0,i]  = 100*(metricsMid['num_detections'] /
-                                        (metricsMid['num_detections'] +
+                metricsSeqAll[si]['motp'][0,i] = 100*(1. - (1.*s / numDet))
+            metricsSeqAll[si]['pre'][0,i]  = 100*(1.*numDet /
+                                        (numDet +
                                         metricsMid['num_false_positives']))
-            metricsSeqAll[si]['rec'][0,i]  = 100*(metricsMid['num_detections'] /
+            metricsSeqAll[si]['rec'][0,i]  = 100*(1.*numDet /
                                        metricsMid['num_objects'])
 
         # average metrics over all joints per  sequence
