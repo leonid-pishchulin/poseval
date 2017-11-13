@@ -44,6 +44,14 @@ def computeMetrics(gtFramesAll, motAll):
     # iterate over tracking sequences
     # seqidxsUniq = seqidxsUniq[:20]
     nSeq = len(seqidxsUniq)
+
+    # initialize per-sequence metrics
+    metricsSeqAll = {}
+    for si in range(nSeq):
+        metricsSeqAll[si] = {}
+        for name in metricsFinNames:
+            metricsSeqAll[si][name] = np.zeros([1,nJoints+1])        
+
     for si in range(nSeq):
         print "seqidx: %d/%d" % (si+1,nSeq)
 
@@ -82,8 +90,33 @@ def computeMetrics(gtFramesAll, motAll):
             metricsMid = mh.compute(accAll[i], metrics=metricsMidNames, return_dataframe=False, name='acc')
             for name in metricsMidNames:
                 metricsMidAll[name][0,i] += metricsMid[name]
-            metricsMidAll['sumD'][0,i] += accAll[i].events['D'].sum()
+            s = accAll[i].events['D'].sum()    
+            metricsMidAll['sumD'][0,i] += s
 
+            # compute final metrics per sequence
+            metricsSeqAll[si]['mota'][0,i] = 100*(1. - (metricsMid['num_misses'] +
+                                                metricsMid['num_switches'] +
+                                                metricsMid['num_false_positives']) /
+                                                metricsMid['num_objects'])
+            numDet = metricsMid['num_detections']
+            if (numDet == 0 or np.isnan(s)):
+                metricsSeqAll[si]['motp'][0,i] = 0.0
+            else:
+                metricsSeqAll[si]['motp'][0,i] = 100*(1. - (s / numDet))
+            metricsSeqAll[si]['pre'][0,i]  = 100*(metricsMid['num_detections'] /
+                                        (metricsMid['num_detections'] +
+                                        metricsMid['num_false_positives']))
+            metricsSeqAll[si]['rec'][0,i]  = 100*(metricsMid['num_detections'] /
+                                       metricsMid['num_objects'])
+
+        # average metrics over all joints per  sequence
+        metricsSeqAll[si]['mota'][0,nJoints] = metricsSeqAll[si]['mota'][0,:nJoints].mean()
+        metricsSeqAll[si]['motp'][0,nJoints] = metricsSeqAll[si]['motp'][0,:nJoints].mean()
+        metricsSeqAll[si]['pre'][0,nJoints]  = metricsSeqAll[si]['pre'] [0,:nJoints].mean()
+        metricsSeqAll[si]['rec'][0,nJoints]  = metricsSeqAll[si]['rec'] [0,:nJoints].mean()
+
+        print "MOTA:",metricsSeqAll[si]['mota'][0,nJoints],"MOTP:",metricsSeqAll[si]['motp'][0,nJoints],"PRE:",metricsSeqAll[si]['pre'][0,nJoints],"REC:",metricsSeqAll[si]['rec'][0,nJoints]
+        
     # compute final metrics per joint for all sequences
     for i in range(nJoints):
         metricsFinAll['mota'][0,i] = 100*(1. - (metricsMidAll['num_misses'][0,i] +
