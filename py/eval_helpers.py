@@ -505,6 +505,11 @@ def assignGTmulti(gtFrames, prFrames, distThresh):
                     score[ridxPr, i] = ppPr["score"][0]
                     hasPr[ridxPr, i] = True
 
+        # info to compute MOT metrics
+        mot = {}
+        for i in range(nJoints):
+            mot[i] = {}
+            
         if len(prFrames[imgidx]["annorect"]) and len(gtFrames[imgidx]["annorect"]):
             # predictions and GT are present
             # iterate over GT poses
@@ -557,11 +562,6 @@ def assignGTmulti(gtFrames, prFrames, distThresh):
             prToGT = np.argmax(pck, axis=0)
             val = np.max(pck, axis=0)
             prToGT[val == 0] = -1
-
-            # info to compute MOT metrics
-            mot = {}
-            for i in range(nJoints):
-                mot[i] = {}
 
             for i in range(nJoints):
                 ridxsGT = np.argwhere(hasGT[:,i] == True); ridxsGT = ridxsGT.flatten().tolist()
