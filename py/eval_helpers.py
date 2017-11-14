@@ -382,6 +382,7 @@ def load_data_dir(argv):
     gt = data["annolist"]
     for imgidx in range(len(gt)):
         gt[imgidx]["seq_id"] = i
+        gt[imgidx]["seq_name"] = os.path.basename(filenames[i]).split('.')[0]
         for ridxGT in range(len(gt[imgidx]["annorect"])):
             if ("track_id" in gt[imgidx]["annorect"][ridxGT].keys()):
                 # adjust track_ids to make them unique across all sequences

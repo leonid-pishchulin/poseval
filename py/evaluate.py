@@ -17,6 +17,7 @@ def parseArgs():
     parser.add_argument("-p", "--predictions",required=False,type=str,help="Directory containing predictions per sequence in json format")
     parser.add_argument("-e", "--evalPoseEstimation",required=False,action="store_true",help="Evaluation of per-frame  multi-person pose estimation using AP metric")
     parser.add_argument("-t", "--evalPoseTracking",required=False,action="store_true",help="Evaluation of video-based  multi-person pose tracking using MOT metrics")
+    parser.add_argument("-o", "--outputDir",required=False,type=str,help="Output directory to store the results",default="./out")
     return parser.parse_args()
 
 
@@ -32,13 +33,16 @@ def main():
     print "# gt frames  :", len(gtFramesAll)
     print "# pred frames:", len(prFramesAll)
 
+    if (not os.path.exists(args.outputDir)):
+        os.makedirs(args.outputDir)
+        
     if (args.evalPoseEstimation):
         #####################################################
         # evaluate per-frame multi-person pose estimation (AP)
 
         # compute AP
         print "Evaluation of per-frame multi-person pose estimation"
-        apAll,preAll,recAll = evaluateAP(gtFramesAll,prFramesAll)
+        apAll,preAll,recAll = evaluateAP(gtFramesAll,prFramesAll,args.outputDir)
 
         # print AP
         print "Average Precision (AP) metric:"
@@ -47,10 +51,10 @@ def main():
     if (args.evalPoseTracking):
         #####################################################
         # evaluate multi-person pose tracking in video (MOTA)
-
+        
         # compute MOTA
-        print "Evaluation of video-based  multi-person pose tracking"
-        metricsAll = evaluateTracking(gtFramesAll,prFramesAll)
+        print "Evaluation of video-based  multi-person pose tracking"    
+        metricsAll = evaluateTracking(gtFramesAll,prFramesAll,args.outputDir)
 
         metrics = np.zeros([Joint().count + 4,1])
         for i in range(Joint().count+1):

@@ -8,7 +8,7 @@ from eval_helpers import Joint
 import motmetrics as mm
 
 
-def computeMetrics(gtFramesAll, motAll):
+def computeMetrics(gtFramesAll, motAll, outputDir):
 
     assert(len(gtFramesAll) == len(motAll))
 
@@ -50,8 +50,11 @@ def computeMetrics(gtFramesAll, motAll):
     for si in range(nSeq):
         metricsSeqAll[si] = {}
         for name in metricsFinNames:
-            metricsSeqAll[si][name] = np.zeros([1,nJoints+1])        
-
+            metricsSeqAll[si][name] = np.zeros([1,nJoints+1])
+            
+    names = Joint().name
+    names['15'] = 'total'
+    
     for si in range(nSeq):
         print "seqidx: %d/%d" % (si+1,nSeq)
 
@@ -65,8 +68,9 @@ def computeMetrics(gtFramesAll, motAll):
         # DEBUG: remove the last frame of each sequence from evaluation due to buggy annotations
         print "DEBUG: remove last frame from eval until annotations are fixed"
         imgidxs = imgidxs[:-1].copy()
+        seqName = gtFramesAll[imgidxs[0,0]]["seq_name"]
         # create an accumulator that will be updated during each frame
-        # iterate over frames
+        # iterate over frames        
         for j in range(len(imgidxs)):
             imgidx = imgidxs[j,0]
             # iterate over joints
@@ -115,7 +119,17 @@ def computeMetrics(gtFramesAll, motAll):
         metricsSeqAll[si]['pre'][0,nJoints]  = metricsSeqAll[si]['pre'] [0,:nJoints].mean()
         metricsSeqAll[si]['rec'][0,nJoints]  = metricsSeqAll[si]['rec'] [0,:nJoints].mean()
 
-        print "MOTA:",metricsSeqAll[si]['mota'][0,nJoints],"MOTP:",metricsSeqAll[si]['motp'][0,nJoints],"PRE:",metricsSeqAll[si]['pre'][0,nJoints],"REC:",metricsSeqAll[si]['rec'][0,nJoints]
+        #print "MOTA:",metricsSeqAll[si]['mota'][0,nJoints],"MOTP:",metricsSeqAll[si]['motp'][0,nJoints],"PRE:",metricsSeqAll[si]['pre'][0,nJoints],"REC:",metricsSeqAll[si]['rec'][0,nJoints]
+        metricsSeq = metricsSeqAll[si].copy()
+        metricsSeq['mota'] = metricsSeq['mota'].flatten().tolist()
+        metricsSeq['motp'] = metricsSeq['motp'].flatten().tolist()
+        metricsSeq['pre'] = metricsSeq['pre'].flatten().tolist()
+        metricsSeq['rec'] = metricsSeq['rec'].flatten().tolist()
+        metricsSeq['names'] = names
+        
+        filename = outputDir + '/' + seqName + '_MOT_metrics.json'
+        print 'saving results to', filename
+        eval_helpers.writeJson(metricsSeq,filename)
         
     # compute final metrics per joint for all sequences
     for i in range(nJoints):
@@ -141,16 +155,27 @@ def computeMetrics(gtFramesAll, motAll):
     metricsFinAll['pre'][0,nJoints]  = metricsFinAll['pre'] [0,:nJoints].mean()
     metricsFinAll['rec'][0,nJoints]  = metricsFinAll['rec'] [0,:nJoints].mean()
 
+    metricsFin = metricsFinAll.copy()
+    metricsFin['mota'] = metricsFin['mota'].flatten().tolist()
+    metricsFin['motp'] = metricsFin['motp'].flatten().tolist()
+    metricsFin['pre'] = metricsFin['pre'].flatten().tolist()
+    metricsFin['rec'] = metricsFin['rec'].flatten().tolist()
+    metricsFin['names'] = names
+
+    filename = outputDir + '/total_MOT_metrics.json'
+    print 'saving results to', filename
+    eval_helpers.writeJson(metricsFin,filename)
+
     return metricsFinAll
 
 
-def evaluateTracking(gtFramesAll, prFramesAll):
+def evaluateTracking(gtFramesAll, prFramesAll, outputDir):
 
     distThresh = 0.5
     # assign predicted poses to GT poses
     _, _, _, motAll = eval_helpers.assignGTmulti(gtFramesAll, prFramesAll, distThresh)
 
     # compute MOT metrics per part
-    metricsAll = computeMetrics(gtFramesAll, motAll)
+    metricsAll = computeMetrics(gtFramesAll, motAll, outputDir)
 
     return metricsAll
