@@ -69,8 +69,9 @@ def computeMetrics(gtFramesAll, motAll, outputDir):
         print "DEBUG: remove last frame from eval until annotations are fixed"
         imgidxs = imgidxs[:-1].copy()
         seqName = gtFramesAll[imgidxs[0,0]]["seq_name"]
+        print seqName
         # create an accumulator that will be updated during each frame
-        # iterate over frames        
+        # iterate over frames
         for j in range(len(imgidxs)):
             imgidx = imgidxs[j,0]
             # iterate over joints
@@ -98,26 +99,38 @@ def computeMetrics(gtFramesAll, motAll, outputDir):
             metricsMidAll['sumD'][0,i] += s
 
             # compute final metrics per sequence
+            if (metricsMid['num_objects'] > 0):
+                numObj = metricsMid['num_objects']
+            else:
+                numObj = np.nan
+            numFP = metricsMid['num_false_positives']
             metricsSeqAll[si]['mota'][0,i] = 100*(1. - 1.*(metricsMid['num_misses'] +
                                                 metricsMid['num_switches'] +
-                                                metricsMid['num_false_positives']) /
-                                                metricsMid['num_objects'])
+                                                numFP) /
+                                                numObj)
             numDet = metricsMid['num_detections']
             if (numDet == 0 or np.isnan(s)):
                 metricsSeqAll[si]['motp'][0,i] = 0.0
             else:
                 metricsSeqAll[si]['motp'][0,i] = 100*(1. - (1.*s / numDet))
+            if (numFP+numDet > 0):
+                totalDet = numFP+numDet
+            else:
+                totalDet = np.nan
             metricsSeqAll[si]['pre'][0,i]  = 100*(1.*numDet /
-                                        (numDet +
-                                        metricsMid['num_false_positives']))
+                                             totalDet)
             metricsSeqAll[si]['rec'][0,i]  = 100*(1.*numDet /
-                                       metricsMid['num_objects'])
+                                       numObj)
 
         # average metrics over all joints per  sequence
-        metricsSeqAll[si]['mota'][0,nJoints] = metricsSeqAll[si]['mota'][0,:nJoints].mean()
-        metricsSeqAll[si]['motp'][0,nJoints] = metricsSeqAll[si]['motp'][0,:nJoints].mean()
-        metricsSeqAll[si]['pre'][0,nJoints]  = metricsSeqAll[si]['pre'] [0,:nJoints].mean()
-        metricsSeqAll[si]['rec'][0,nJoints]  = metricsSeqAll[si]['rec'] [0,:nJoints].mean()
+        idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['mota'][0,:]))
+        metricsSeqAll[si]['mota'][0,nJoints] = metricsSeqAll[si]['mota'][0,idxs].mean()
+        idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['motp'][0,:]))
+        metricsSeqAll[si]['motp'][0,nJoints] = metricsSeqAll[si]['motp'][0,idxs].mean()
+        idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['pre'][0,:]))
+        metricsSeqAll[si]['pre'][0,nJoints]  = metricsSeqAll[si]['pre'] [0,idxs].mean()
+        idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['rec'][0,:]))
+        metricsSeqAll[si]['rec'][0,nJoints]  = metricsSeqAll[si]['rec'] [0,idxs].mean()
 
         #print "MOTA:",metricsSeqAll[si]['mota'][0,nJoints],"MOTP:",metricsSeqAll[si]['motp'][0,nJoints],"PRE:",metricsSeqAll[si]['pre'][0,nJoints],"REC:",metricsSeqAll[si]['rec'][0,nJoints]
         metricsSeq = metricsSeqAll[si].copy()
@@ -133,27 +146,40 @@ def computeMetrics(gtFramesAll, motAll, outputDir):
         
     # compute final metrics per joint for all sequences
     for i in range(nJoints):
+        if (metricsMidAll['num_objects'][0,i] > 0):
+            numObj = metricsMidAll['num_objects'][0,i]
+        else:
+            numObj = np.nan
+        numFP = metricsMidAll['num_false_positives'][0,i]
         metricsFinAll['mota'][0,i] = 100*(1. - (metricsMidAll['num_misses'][0,i] +
                                                 metricsMidAll['num_switches'][0,i] +
-                                                metricsMidAll['num_false_positives'][0,i]) /
-                                                metricsMidAll['num_objects'][0,i])
+                                                numFP) /
+                                                numObj)
         numDet = metricsMidAll['num_detections'][0,i]
         s = metricsMidAll['sumD'][0,i]
         if (numDet == 0 or np.isnan(s)):
             metricsFinAll['motp'][0,i] = 0.0
         else:
             metricsFinAll['motp'][0,i] = 100*(1. - (s / numDet))
-        metricsFinAll['pre'][0,i]  = 100*(metricsMidAll['num_detections'][0,i] /
-                                       (metricsMidAll['num_detections'][0,i] +
-                                        metricsMidAll['num_false_positives'][0,i]))
-        metricsFinAll['rec'][0,i]  = 100*(metricsMidAll['num_detections'][0,i] /
-                                       metricsMidAll['num_objects'][0,i])
+        if (numFP+numDet > 0):
+            totalDet = numFP+numDet
+        else:
+            totalDet = np.nan
+
+        metricsFinAll['pre'][0,i]  = 100*(1.*numDet /
+                                       totalDet)
+        metricsFinAll['rec'][0,i]  = 100*(1.*numDet /
+                                       numObj)
 
     # average metrics over all joints over all sequences
-    metricsFinAll['mota'][0,nJoints] = metricsFinAll['mota'][0,:nJoints].mean()
-    metricsFinAll['motp'][0,nJoints] = metricsFinAll['motp'][0,:nJoints].mean()
-    metricsFinAll['pre'][0,nJoints]  = metricsFinAll['pre'] [0,:nJoints].mean()
-    metricsFinAll['rec'][0,nJoints]  = metricsFinAll['rec'] [0,:nJoints].mean()
+    idxs = np.argwhere(~np.isnan(metricsFinAll['mota'][0,:]))
+    metricsFinAll['mota'][0,nJoints] = metricsFinAll['mota'][0,idxs].mean()
+    idxs = np.argwhere(~np.isnan(metricsFinAll['motp'][0,:]))
+    metricsFinAll['motp'][0,nJoints] = metricsFinAll['motp'][0,idxs].mean()
+    idxs = np.argwhere(~np.isnan(metricsFinAll['pre'][0,:]))
+    metricsFinAll['pre'][0,nJoints]  = metricsFinAll['pre'] [0,idxs].mean()
+    idxs = np.argwhere(~np.isnan(metricsFinAll['rec'][0,:]))
+    metricsFinAll['rec'][0,nJoints]  = metricsFinAll['rec'] [0,idxs].mean()
 
     metricsFin = metricsFinAll.copy()
     metricsFin['mota'] = metricsFin['mota'].flatten().tolist()

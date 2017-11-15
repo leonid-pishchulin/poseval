@@ -453,7 +453,6 @@ def assignGTmulti(gtFrames, prFrames, distThresh):
     motAll = {}
 
     for imgidx in range(len(gtFrames)):
-
         # distance between predicted and GT joints
         dist = np.full((len(prFrames[imgidx]["annorect"]), len(gtFrames[imgidx]["annorect"]), nJoints), np.inf)
         # score of the predicted joint
@@ -505,11 +504,6 @@ def assignGTmulti(gtFrames, prFrames, distThresh):
                     score[ridxPr, i] = ppPr["score"][0]
                     hasPr[ridxPr, i] = True
 
-        # info to compute MOT metrics
-        mot = {}
-        for i in range(nJoints):
-            mot[i] = {}
-            
         if len(prFrames[imgidx]["annorect"]) and len(gtFrames[imgidx]["annorect"]):
             # predictions and GT are present
             # iterate over GT poses
@@ -563,6 +557,11 @@ def assignGTmulti(gtFrames, prFrames, distThresh):
             val = np.max(pck, axis=0)
             prToGT[val == 0] = -1
 
+            # info to compute MOT metrics
+            mot = {}
+            for i in range(nJoints):
+                mot[i] = {}
+
             for i in range(nJoints):
                 ridxsGT = np.argwhere(hasGT[:,i] == True); ridxsGT = ridxsGT.flatten().tolist()
                 ridxsPr = np.argwhere(hasPr[:,i] == True); ridxsPr = ridxsPr.flatten().tolist()
@@ -610,6 +609,17 @@ def assignGTmulti(gtFrames, prFrames, distThresh):
                         if hp[i]:
                             scoresAll[i][imgidx] = np.append(scoresAll[i][imgidx], s[i])
                             labelsAll[i][imgidx] = np.append(labelsAll[i][imgidx], m[i])
+            mot = {}
+            for i in range(nJoints):
+                mot[i] = {}
+            for i in range(nJoints):
+                ridxsGT = [0]
+                ridxsPr = [0]
+                mot[i]["trackidxGT"] = [0]
+                mot[i]["trackidxPr"] = [0]
+                mot[i]["ridxsGT"] = np.array(ridxsGT)
+                mot[i]["ridxsPr"] = np.array(ridxsPr)
+                mot[i]["dist"] = np.full((len(ridxsGT),len(ridxsPr)),np.nan)
 
         # save number of GT joints
         for ridxGT in range(hasGT.shape[0]):

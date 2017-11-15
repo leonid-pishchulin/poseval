@@ -25,9 +25,12 @@ def computeMetrics(scoresAll, labelsAll, nGTall):
             apAll[j] = eval_helpers.VOCap(recall, precision) * 100
             preAll[j] = precision[len(precision) - 1] * 100
             recAll[j] = recall[len(recall) - 1] * 100
-    apAll[nGTall.shape[0]] = apAll[:nGTall.shape[0], 0].mean()
-    recAll[nGTall.shape[0]] = recAll[:nGTall.shape[0], 0].mean()
-    preAll[nGTall.shape[0]] = preAll[:nGTall.shape[0], 0].mean()
+    idxs = np.argwhere(~np.isnan(apAll[:,0]))
+    apAll[nGTall.shape[0]] = apAll[idxs, 0].mean()
+    idxs = np.argwhere(~np.isnan(recAll[:,0]))
+    recAll[nGTall.shape[0]] = recAll[idxs, 0].mean()
+    idxs = np.argwhere(~np.isnan(preAll[:,0]))
+    preAll[nGTall.shape[0]] = preAll[idxs, 0].mean()
 
     return apAll, preAll, recAll
 
