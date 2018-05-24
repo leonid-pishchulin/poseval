@@ -382,6 +382,7 @@ def load_data_dir(argv):
     gt = data["annolist"]
     for imgidx in range(len(gt)):
         gt[imgidx]["seq_id"] = i
+        gt[imgidx]["seq_name"] = os.path.basename(filenames[i]).split('.')[0]
         for ridxGT in range(len(gt[imgidx]["annorect"])):
             if ("track_id" in gt[imgidx]["annorect"][ridxGT].keys()):
                 # adjust track_ids to make them unique across all sequences
@@ -452,7 +453,6 @@ def assignGTmulti(gtFrames, prFrames, distThresh):
     motAll = {}
 
     for imgidx in range(len(gtFrames)):
-
         # distance between predicted and GT joints
         dist = np.full((len(prFrames[imgidx]["annorect"]), len(gtFrames[imgidx]["annorect"]), nJoints), np.inf)
         # score of the predicted joint
@@ -609,6 +609,17 @@ def assignGTmulti(gtFrames, prFrames, distThresh):
                         if hp[i]:
                             scoresAll[i][imgidx] = np.append(scoresAll[i][imgidx], s[i])
                             labelsAll[i][imgidx] = np.append(labelsAll[i][imgidx], m[i])
+            mot = {}
+            for i in range(nJoints):
+                mot[i] = {}
+            for i in range(nJoints):
+                ridxsGT = [0]
+                ridxsPr = [0]
+                mot[i]["trackidxGT"] = [0]
+                mot[i]["trackidxPr"] = [0]
+                mot[i]["ridxsGT"] = np.array(ridxsGT)
+                mot[i]["ridxsPr"] = np.array(ridxsPr)
+                mot[i]["dist"] = np.full((len(ridxsGT),len(ridxsPr)),np.nan)
 
         # save number of GT joints
         for ridxGT in range(hasGT.shape[0]):
