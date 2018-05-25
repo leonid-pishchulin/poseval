@@ -8,7 +8,7 @@ from eval_helpers import Joint
 import motmetrics as mm
 
 
-def computeMetrics(gtFramesAll, motAll, outputDir):
+def computeMetrics(gtFramesAll, motAll, outputDir, bSaveSeq):
 
     assert(len(gtFramesAll) == len(motAll))
 
@@ -51,10 +51,10 @@ def computeMetrics(gtFramesAll, motAll, outputDir):
         metricsSeqAll[si] = {}
         for name in metricsFinNames:
             metricsSeqAll[si][name] = np.zeros([1,nJoints+1])
-            
+
     names = Joint().name
     names['15'] = 'total'
-    
+
     for si in range(nSeq):
         print "seqidx: %d/%d" % (si+1,nSeq)
 
@@ -65,8 +65,6 @@ def computeMetrics(gtFramesAll, motAll, outputDir):
 
         # extract frames IDs for the sequence
         imgidxs = np.argwhere(seqidxs == seqidxsUniq[si])
-        # DEBUG: remove the last frame of each sequence from evaluation due to buggy annotations
-        print "DEBUG: remove last frame from eval until annotations are fixed"
         imgidxs = imgidxs[:-1].copy()
         seqName = gtFramesAll[imgidxs[0,0]]["seq_name"]
         print seqName
@@ -95,55 +93,59 @@ def computeMetrics(gtFramesAll, motAll, outputDir):
             metricsMid = mh.compute(accAll[i], metrics=metricsMidNames, return_dataframe=False, name='acc')
             for name in metricsMidNames:
                 metricsMidAll[name][0,i] += metricsMid[name]
-            s = accAll[i].events['D'].sum()    
+            s = accAll[i].events['D'].sum()
             metricsMidAll['sumD'][0,i] += s
 
-            # compute final metrics per sequence
-            if (metricsMid['num_objects'] > 0):
-                numObj = metricsMid['num_objects']
-            else:
-                numObj = np.nan
-            numFP = metricsMid['num_false_positives']
-            metricsSeqAll[si]['mota'][0,i] = 100*(1. - 1.*(metricsMid['num_misses'] +
-                                                metricsMid['num_switches'] +
-                                                numFP) /
-                                                numObj)
-            numDet = metricsMid['num_detections']
-            if (numDet == 0 or np.isnan(s)):
-                metricsSeqAll[si]['motp'][0,i] = 0.0
-            else:
-                metricsSeqAll[si]['motp'][0,i] = 100*(1. - (1.*s / numDet))
-            if (numFP+numDet > 0):
-                totalDet = numFP+numDet
-            else:
-                totalDet = np.nan
-            metricsSeqAll[si]['pre'][0,i]  = 100*(1.*numDet /
-                                             totalDet)
-            metricsSeqAll[si]['rec'][0,i]  = 100*(1.*numDet /
-                                       numObj)
+        if (bSaveSeq):
+            # compute metrics per joint per sequence
+            for i in range(nJoints):
+                metricsMid = mh.compute(accAll[i], metrics=metricsMidNames, return_dataframe=False, name='acc')
 
-        # average metrics over all joints per  sequence
-        idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['mota'][0,:]))
-        metricsSeqAll[si]['mota'][0,nJoints] = metricsSeqAll[si]['mota'][0,idxs].mean()
-        idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['motp'][0,:]))
-        metricsSeqAll[si]['motp'][0,nJoints] = metricsSeqAll[si]['motp'][0,idxs].mean()
-        idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['pre'][0,:]))
-        metricsSeqAll[si]['pre'][0,nJoints]  = metricsSeqAll[si]['pre'] [0,idxs].mean()
-        idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['rec'][0,:]))
-        metricsSeqAll[si]['rec'][0,nJoints]  = metricsSeqAll[si]['rec'] [0,idxs].mean()
+                # compute final metrics per sequence
+                if (metricsMid['num_objects'] > 0):
+                    numObj = metricsMid['num_objects']
+                else:
+                    numObj = np.nan
+                numFP = metricsMid['num_false_positives']
+                metricsSeqAll[si]['mota'][0,i] = 100*(1. - 1.*(metricsMid['num_misses'] +
+                                                    metricsMid['num_switches'] +
+                                                    numFP) /
+                                                    numObj)
+                numDet = metricsMid['num_detections']
+                if (numDet == 0 or np.isnan(s)):
+                    metricsSeqAll[si]['motp'][0,i] = 0.0
+                else:
+                    metricsSeqAll[si]['motp'][0,i] = 100*(1. - (1.*s / numDet))
+                if (numFP+numDet > 0):
+                    totalDet = numFP+numDet
+                else:
+                    totalDet = np.nan
+                metricsSeqAll[si]['pre'][0,i]  = 100*(1.*numDet /
+                                                totalDet)
+                metricsSeqAll[si]['rec'][0,i]  = 100*(1.*numDet /
+                                        numObj)
 
-        #print "MOTA:",metricsSeqAll[si]['mota'][0,nJoints],"MOTP:",metricsSeqAll[si]['motp'][0,nJoints],"PRE:",metricsSeqAll[si]['pre'][0,nJoints],"REC:",metricsSeqAll[si]['rec'][0,nJoints]
-        metricsSeq = metricsSeqAll[si].copy()
-        metricsSeq['mota'] = metricsSeq['mota'].flatten().tolist()
-        metricsSeq['motp'] = metricsSeq['motp'].flatten().tolist()
-        metricsSeq['pre'] = metricsSeq['pre'].flatten().tolist()
-        metricsSeq['rec'] = metricsSeq['rec'].flatten().tolist()
-        metricsSeq['names'] = names
-        
-        filename = outputDir + '/' + seqName + '_MOT_metrics.json'
-        print 'saving results to', filename
-        eval_helpers.writeJson(metricsSeq,filename)
-        
+            # average metrics over all joints per sequence
+            idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['mota'][0,:]))
+            metricsSeqAll[si]['mota'][0,nJoints] = metricsSeqAll[si]['mota'][0,idxs].mean()
+            idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['motp'][0,:]))
+            metricsSeqAll[si]['motp'][0,nJoints] = metricsSeqAll[si]['motp'][0,idxs].mean()
+            idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['pre'][0,:]))
+            metricsSeqAll[si]['pre'][0,nJoints]  = metricsSeqAll[si]['pre'] [0,idxs].mean()
+            idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['rec'][0,:]))
+            metricsSeqAll[si]['rec'][0,nJoints]  = metricsSeqAll[si]['rec'] [0,idxs].mean()
+
+            metricsSeq = metricsSeqAll[si].copy()
+            metricsSeq['mota'] = metricsSeq['mota'].flatten().tolist()
+            metricsSeq['motp'] = metricsSeq['motp'].flatten().tolist()
+            metricsSeq['pre'] = metricsSeq['pre'].flatten().tolist()
+            metricsSeq['rec'] = metricsSeq['rec'].flatten().tolist()
+            metricsSeq['names'] = names
+
+            filename = outputDir + '/' + seqName + '_MOT_metrics.json'
+            print 'saving results to', filename
+            eval_helpers.writeJson(metricsSeq,filename)
+
     # compute final metrics per joint for all sequences
     for i in range(nJoints):
         if (metricsMidAll['num_objects'][0,i] > 0):
@@ -195,13 +197,13 @@ def computeMetrics(gtFramesAll, motAll, outputDir):
     return metricsFinAll
 
 
-def evaluateTracking(gtFramesAll, prFramesAll, outputDir):
+def evaluateTracking(gtFramesAll, prFramesAll, outputDir, saveSeq):
 
     distThresh = 0.5
     # assign predicted poses to GT poses
     _, _, _, motAll = eval_helpers.assignGTmulti(gtFramesAll, prFramesAll, distThresh)
 
     # compute MOT metrics per part
-    metricsAll = computeMetrics(gtFramesAll, motAll, outputDir)
+    metricsAll = computeMetrics(gtFramesAll, motAll, outputDir, saveSeq)
 
     return metricsAll

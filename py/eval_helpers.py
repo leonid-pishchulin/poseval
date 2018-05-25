@@ -374,7 +374,7 @@ def load_data_dir(argv):
   gtFramesAll = []
   prFramesAll = []
 
-  MAX_TRACK_ID = 1000
+  MAX_TRACK_ID = 10000
   for i in range(len(filenames)):
     # load each annotation json file
     with open(filenames[i]) as data_file:

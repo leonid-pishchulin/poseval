@@ -35,7 +35,7 @@ def computeMetrics(scoresAll, labelsAll, nGTall):
     return apAll, preAll, recAll
 
 
-def evaluateAP(gtFramesAll, prFramesAll, outputDir):
+def evaluateAP(gtFramesAll, prFramesAll, outputDir, bSaveSeq):
 
     distThresh = 0.5
 
@@ -50,25 +50,27 @@ def evaluateAP(gtFramesAll, prFramesAll, outputDir):
     names = Joint().name
     names['15'] = 'total'
 
-    for si in range(nSeq):
-        print "seqidx: %d/%d" % (si+1,nSeq)
+    if (bSaveSeq):
+        for si in range(nSeq):
+            print "seqidx: %d/%d" % (si+1,nSeq)
 
-        # extract frames IDs for the sequence
-        imgidxs = np.argwhere(seqidxs == seqidxsUniq[si])
-        seqName = gtFramesAll[imgidxs[0,0]]["seq_name"]
+            # extract frames IDs for the sequence
+            imgidxs = np.argwhere(seqidxs == seqidxsUniq[si])
+            seqName = gtFramesAll[imgidxs[0,0]]["seq_name"]
 
-        gtFrames = [gtFramesAll[imgidx] for imgidx in imgidxs.flatten().tolist()]
-        prFrames = [prFramesAll[imgidx] for imgidx in imgidxs.flatten().tolist()]
+            gtFrames = [gtFramesAll[imgidx] for imgidx in imgidxs.flatten().tolist()]
+            prFrames = [prFramesAll[imgidx] for imgidx in imgidxs.flatten().tolist()]
 
-        # assign predicted poses to GT poses
-        scores, labels, nGT, _ = eval_helpers.assignGTmulti(gtFrames, prFrames, distThresh)
+            # assign predicted poses to GT poses
+            scores, labels, nGT, _ = eval_helpers.assignGTmulti(gtFrames, prFrames, distThresh)
 
-        # compute average precision (AP), precision and recall per part
-        ap, pre, rec = computeMetrics(scores, labels, nGT)
-        metricsSeq = {'ap': ap.flatten().tolist(), 'pre': pre.flatten().tolist(), 'rec': rec.flatten().tolist(), 'names': names}
-        filename = outputDir + '/' + seqName + '_AP_metrics.json'
-        print 'saving results to', filename
-        eval_helpers.writeJson(metricsSeq,filename)
+            # compute average precision (AP), precision and recall per part
+            ap, pre, rec = computeMetrics(scores, labels, nGT)
+            metricsSeq = {'ap': ap.flatten().tolist(), 'pre': pre.flatten().tolist(), 'rec': rec.flatten().tolist(), 'names': names}
+
+            filename = outputDir + '/' + seqName + '_AP_metrics.json'
+            print 'saving results to', filename
+            eval_helpers.writeJson(metricsSeq,filename)
 
     # assign predicted poses to GT poses
     scoresAll, labelsAll, nGTall, _ = eval_helpers.assignGTmulti(gtFramesAll, prFramesAll, distThresh)
