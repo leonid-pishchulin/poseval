@@ -126,13 +126,13 @@ def computeMetrics(gtFramesAll, motAll, outputDir, bSaveSeq):
                                         numObj)
 
             # average metrics over all joints per sequence
-            idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['mota'][0,:]))
+            idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['mota'][0,:nJoints]))
             metricsSeqAll[si]['mota'][0,nJoints] = metricsSeqAll[si]['mota'][0,idxs].mean()
-            idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['motp'][0,:]))
+            idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['motp'][0,:nJoints]))
             metricsSeqAll[si]['motp'][0,nJoints] = metricsSeqAll[si]['motp'][0,idxs].mean()
-            idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['pre'][0,:]))
+            idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['pre'][0,:nJoints]))
             metricsSeqAll[si]['pre'][0,nJoints]  = metricsSeqAll[si]['pre'] [0,idxs].mean()
-            idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['rec'][0,:]))
+            idxs = np.argwhere(~np.isnan(metricsSeqAll[si]['rec'][0,:nJoints]))
             metricsSeqAll[si]['rec'][0,nJoints]  = metricsSeqAll[si]['rec'] [0,idxs].mean()
 
             metricsSeq = metricsSeqAll[si].copy()
@@ -174,13 +174,13 @@ def computeMetrics(gtFramesAll, motAll, outputDir, bSaveSeq):
                                        numObj)
 
     # average metrics over all joints over all sequences
-    idxs = np.argwhere(~np.isnan(metricsFinAll['mota'][0,:]))
+    idxs = np.argwhere(~np.isnan(metricsFinAll['mota'][0,:nJoints]))
     metricsFinAll['mota'][0,nJoints] = metricsFinAll['mota'][0,idxs].mean()
-    idxs = np.argwhere(~np.isnan(metricsFinAll['motp'][0,:]))
+    idxs = np.argwhere(~np.isnan(metricsFinAll['motp'][0,:nJoints]))
     metricsFinAll['motp'][0,nJoints] = metricsFinAll['motp'][0,idxs].mean()
-    idxs = np.argwhere(~np.isnan(metricsFinAll['pre'][0,:]))
+    idxs = np.argwhere(~np.isnan(metricsFinAll['pre'][0,:nJoints]))
     metricsFinAll['pre'][0,nJoints]  = metricsFinAll['pre'] [0,idxs].mean()
-    idxs = np.argwhere(~np.isnan(metricsFinAll['rec'][0,:]))
+    idxs = np.argwhere(~np.isnan(metricsFinAll['rec'][0,:nJoints]))
     metricsFinAll['rec'][0,nJoints]  = metricsFinAll['rec'] [0,idxs].mean()
 
     metricsFin = metricsFinAll.copy()

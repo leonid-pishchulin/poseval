@@ -44,6 +44,7 @@ Evaluation requires ground truth (GT) annotations available at [PoseTrack](https
 			           "id": [0],
 				   "x": [394],
 				   "y": [173],
+				   "score": [0.7],
 			       },
 			       { ... }
 			   ]
