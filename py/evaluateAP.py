@@ -35,7 +35,7 @@ def computeMetrics(scoresAll, labelsAll, nGTall):
     return apAll, preAll, recAll
 
 
-def evaluateAP(gtFramesAll, prFramesAll, outputDir, bSaveSeq):
+def evaluateAP(gtFramesAll, prFramesAll, outputDir, bSaveAll=True, bSaveSeq=False):
 
     distThresh = 0.5
 
@@ -77,9 +77,10 @@ def evaluateAP(gtFramesAll, prFramesAll, outputDir, bSaveSeq):
 
     # compute average precision (AP), precision and recall per part
     apAll, preAll, recAll = computeMetrics(scoresAll, labelsAll, nGTall)
-    metrics = {'ap': apAll.flatten().tolist(), 'pre': preAll.flatten().tolist(), 'rec': recAll.flatten().tolist(),  'names': names}
-    filename = outputDir + '/total_AP_metrics.json'
-    print 'saving results to', filename
-    eval_helpers.writeJson(metrics,filename)
+    if (bSaveAll):
+        metrics = {'ap': apAll.flatten().tolist(), 'pre': preAll.flatten().tolist(), 'rec': recAll.flatten().tolist(),  'names': names}
+        filename = outputDir + '/total_AP_metrics.json'
+        print 'saving results to', filename
+        eval_helpers.writeJson(metrics,filename)
 
     return apAll, preAll, recAll

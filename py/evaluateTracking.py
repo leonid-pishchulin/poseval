@@ -8,7 +8,7 @@ from eval_helpers import Joint
 import motmetrics as mm
 
 
-def computeMetrics(gtFramesAll, motAll, outputDir, bSaveSeq):
+def computeMetrics(gtFramesAll, motAll, outputDir, bSaveAll, bSaveSeq):
 
     assert(len(gtFramesAll) == len(motAll))
 
@@ -183,27 +183,28 @@ def computeMetrics(gtFramesAll, motAll, outputDir, bSaveSeq):
     idxs = np.argwhere(~np.isnan(metricsFinAll['rec'][0,:nJoints]))
     metricsFinAll['rec'][0,nJoints]  = metricsFinAll['rec'] [0,idxs].mean()
 
-    metricsFin = metricsFinAll.copy()
-    metricsFin['mota'] = metricsFin['mota'].flatten().tolist()
-    metricsFin['motp'] = metricsFin['motp'].flatten().tolist()
-    metricsFin['pre'] = metricsFin['pre'].flatten().tolist()
-    metricsFin['rec'] = metricsFin['rec'].flatten().tolist()
-    metricsFin['names'] = names
+    if (bSaveAll):
+        metricsFin = metricsFinAll.copy()
+        metricsFin['mota'] = metricsFin['mota'].flatten().tolist()
+        metricsFin['motp'] = metricsFin['motp'].flatten().tolist()
+        metricsFin['pre'] = metricsFin['pre'].flatten().tolist()
+        metricsFin['rec'] = metricsFin['rec'].flatten().tolist()
+        metricsFin['names'] = names
 
-    filename = outputDir + '/total_MOT_metrics.json'
-    print 'saving results to', filename
-    eval_helpers.writeJson(metricsFin,filename)
+        filename = outputDir + '/total_MOT_metrics.json'
+        print 'saving results to', filename
+        eval_helpers.writeJson(metricsFin,filename)
 
     return metricsFinAll
 
 
-def evaluateTracking(gtFramesAll, prFramesAll, outputDir, saveSeq):
+def evaluateTracking(gtFramesAll, prFramesAll, outputDir, saveAll=True, saveSeq=False):
 
     distThresh = 0.5
     # assign predicted poses to GT poses
     _, _, _, motAll = eval_helpers.assignGTmulti(gtFramesAll, prFramesAll, distThresh)
 
     # compute MOT metrics per part
-    metricsAll = computeMetrics(gtFramesAll, motAll, outputDir, saveSeq)
+    metricsAll = computeMetrics(gtFramesAll, motAll, outputDir, saveAll, saveSeq)
 
     return metricsAll

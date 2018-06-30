@@ -43,7 +43,7 @@ def main():
 
         # compute AP
         print "Evaluation of per-frame multi-person pose estimation"
-        apAll,preAll,recAll = evaluateAP(gtFramesAll,prFramesAll,args.outputDir,args.saveEvalPerSequence)
+        apAll,preAll,recAll = evaluateAP(gtFramesAll,prFramesAll,args.outputDir,True,args.saveEvalPerSequence)
 
         # print AP
         print "Average Precision (AP) metric:"
@@ -55,7 +55,7 @@ def main():
         
         # compute MOTA
         print "Evaluation of video-based  multi-person pose tracking"    
-        metricsAll = evaluateTracking(gtFramesAll,prFramesAll,args.outputDir,args.saveEvalPerSequence)
+        metricsAll = evaluateTracking(gtFramesAll,prFramesAll,args.outputDir,True,args.saveEvalPerSequence)
 
         metrics = np.zeros([Joint().count + 4,1])
         for i in range(Joint().count+1):
