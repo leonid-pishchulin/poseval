@@ -94,6 +94,8 @@ def computeMetrics(gtFramesAll, motAll, outputDir, bSaveAll, bSaveSeq):
             for name in metricsMidNames:
                 metricsMidAll[name][0,i] += metricsMid[name]
             s = accAll[i].events['D'].sum()
+            if (np.isnan(s)):
+                s = 0
             metricsMidAll['sumD'][0,i] += s
 
         if (bSaveSeq):
@@ -112,6 +114,7 @@ def computeMetrics(gtFramesAll, motAll, outputDir, bSaveAll, bSaveSeq):
                                                     numFP) /
                                                     numObj)
                 numDet = metricsMid['num_detections']
+                s = accAll[i].events['D'].sum()
                 if (numDet == 0 or np.isnan(s)):
                     metricsSeqAll[si]['motp'][0,i] = 0.0
                 else:
