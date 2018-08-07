@@ -4,6 +4,7 @@ import sys
 import os
 import json
 import glob
+from convert import convert_videos
 
 class Joint:
     def __init__(self):
@@ -362,7 +363,6 @@ def removeRectsWithoutPoints(rects):
   rects = [rects[ridx] for ridx in idxsPr]
   return rects
 
-
 def load_data_dir(argv):
 
   gt_dir, pred_dir, mode = process_arguments(argv)
@@ -378,7 +378,9 @@ def load_data_dir(argv):
   for i in range(len(filenames)):
     # load each annotation json file
     with open(filenames[i]) as data_file:
-      data = json.load(data_file)
+        data = json.load(data_file)
+    if (not "annolist" in data):
+        data = convert_videos(data)[0]
     gt = data["annolist"]
     for imgidx in range(len(gt)):
         gt[imgidx]["seq_id"] = i
@@ -397,7 +399,9 @@ def load_data_dir(argv):
 
     # load predictions
     with open(predFilename) as data_file:
-      data = json.load(data_file)
+        data = json.load(data_file)
+    if (not "annolist" in data):
+        data = convert_videos(data)[0]
     pr = data["annolist"]
     if (len(pr) <> len(gt)):
         raise Exception('# prediction frames %d <> # GT frames %d for %s' % (len(pr),len(gt),predFilename))

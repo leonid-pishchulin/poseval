@@ -11,6 +11,8 @@ This README provides instructions how to evaluate your method's predictions on [
 - numpy>=1.12.1
 - pandas>=0.19.2
 - scipy>=0.19.0
+- tqdm>=4.24.0
+- click>=6.7
 
 ## Install
 ```
