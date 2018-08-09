@@ -399,7 +399,7 @@ class Person:
             np.array(person_info["keypoints"]).reshape(len(conversion_table), 3)
         ):
             landmark_idx_can = conversion_table[landmark_idx]
-            if landmark_idx_can:
+            if landmark_idx_can is not None:
                 person.landmarks.append(
                     {
                         "y": landmark_info[1],
