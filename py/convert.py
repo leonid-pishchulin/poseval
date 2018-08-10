@@ -278,7 +278,8 @@ class Person:
         keypoints = []
         points = []
         for landmark_info in self.landmarks:
-            if "is_visible" in landmark_info.keys() and landmark_info["is_visible"] < 0.1:
+            # Skip all the (0, 0) keypoints
+            if landmark_info["x"] <= 0 and landmark_info["y"] <= 0:
                 continue
             point = {
                 "id": [landmark_info["id"]],
