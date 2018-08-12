@@ -129,12 +129,17 @@ class Video:
     def to_old(self):
         """Return a dictionary representation for the PoseTrack17 format."""
         res = {"annolist": []}
+        last_name = ""
         for image in self.frames:
             for person in image.people:
                 elem = {}
                 elem["image"] = [image.to_old()]
-                elem["annorect"] = [person.to_old()]
-                res["annolist"].append(elem)
+                if elem["image"][0]["name"] == last_name:
+                    res["annolist"][-1]["annorect"].append(person.to_old())
+                else:
+                    last_name = elem["image"][0]["name"]
+                    elem["annorect"] = [person.to_old()]
+                    res["annolist"].append(elem)
         return res
 
     @classmethod
@@ -271,7 +276,11 @@ class Person:
     def to_old(self):
         """Return a dictionary representation for the PoseTrack17 format."""
         keypoints = []
+        points = []
         for landmark_info in self.landmarks:
+            # Skip all the (0, 0) keypoints
+            if landmark_info["x"] <= 0 and landmark_info["y"] <= 0:
+                continue
             point = {
                 "id": [landmark_info["id"]],
                 "x": [landmark_info["x"]],
@@ -281,7 +290,9 @@ class Person:
                 point["score"] = [landmark_info["score"]]
             if "is_visible" in landmark_info.keys():
                 point["is_visible"] = [landmark_info["is_visible"]]
-            keypoints.append({"point": [point]})
+            points.append(point)
+        if points:
+            keypoints.append({"point": points})
         ret = {"track_id": [self.track_id], "annopoints": keypoints}
         if self.rect_head:
             ret["x1"] = [self.rect_head["x1"]]
@@ -389,7 +400,7 @@ class Person:
             np.array(person_info["keypoints"]).reshape(len(conversion_table), 3)
         ):
             landmark_idx_can = conversion_table[landmark_idx]
-            if landmark_idx_can:
+            if landmark_idx_can is not None:
                 person.landmarks.append(
                     {
                         "y": landmark_info[1],
