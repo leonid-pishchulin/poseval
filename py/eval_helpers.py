@@ -6,6 +6,9 @@ import json
 import glob
 from convert import convert_videos
 
+MIN_SCORE = -9999
+MAX_TRACK_ID = 10000
+
 class Joint:
     def __init__(self):
         self.count = 15
@@ -374,7 +377,6 @@ def load_data_dir(argv):
   gtFramesAll = []
   prFramesAll = []
 
-  MAX_TRACK_ID = 10000
   for i in range(len(filenames)):
     # load each annotation json file
     with open(filenames[i]) as data_file:
@@ -504,8 +506,11 @@ def assignGTmulti(gtFrames, prFrames, distThresh):
                 # predicted joint in LSP format
                 ppPr = getPointGTbyID(pointsPr, i)
                 if len(ppPr) > 0:
-                    assert("score" in ppPr.keys() and "keypoint score is missing")
-                    score[ridxPr, i] = ppPr["score"][0]
+                    if not ("score" in ppPr.keys()):
+                        # use minimum score if predicted score is missing
+                        score[ridxPr, i] = MIN_SCORE
+                    else:
+                        score[ridxPr, i] = ppPr["score"][0]
                     hasPr[ridxPr, i] = True
 
         if len(prFrames[imgidx]["annorect"]) and len(gtFrames[imgidx]["annorect"]):
