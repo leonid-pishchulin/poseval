@@ -508,6 +508,8 @@ def assignGTmulti(gtFrames, prFrames, distThresh):
                 if len(ppPr) > 0:
                     if not ("score" in ppPr.keys()):
                         # use minimum score if predicted score is missing
+                        if (imgidx == 0):
+                            print('WARNING: prediction score is missing. Setting fallback score={}'.format(MIN_SCORE))
                         score[ridxPr, i] = MIN_SCORE
                     else:
                         score[ridxPr, i] = ppPr["score"][0]
