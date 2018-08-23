@@ -388,8 +388,9 @@ class Person:
             person.rect = rect
         except KeyError:
             person.rect = None
+        person.score = []
         try:
-            person.score = person_info["score"]
+            person.score = person_info["scores"]
         except KeyError:
             if not SCORE_WARNING_EMITTED:
                 LOGGER.warning("No landmark scoring information found!")
@@ -407,6 +408,7 @@ class Person:
                         "x": landmark_info[0],
                         "id": landmark_idx_can,
                         "is_visible": landmark_info[2],
+                        "score": person.score[landmark_idx] if len(person.score) > 0 else -9999
                     }
                 )
         return person
