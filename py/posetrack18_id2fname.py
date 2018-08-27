@@ -609,7 +609,7 @@ posetrack18_train_sequences = set(
         (1, 13526),
         (1, 23469),
         (1, 18651),
-        (1, 264712),
+        (1, 24712),
         (1, 12783),
         (1, 14195),
         (1, 14694),
@@ -1659,8 +1659,6 @@ def posetrack18_fname2id(fname, frameidx):
     seqidx = int(tok[0])
     seqtype_idx = seqtype2idx(tok[1])
 
-    if not (frameidx >= 0 and frameidx < 1e4):
-        import pdb; pdb.set_trace()
     assert frameidx >= 0 and frameidx < 1e4
     image_id = seqtype_idx * 10000000000 + seqidx * 10000 + frameidx
     return image_id

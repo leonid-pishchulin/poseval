@@ -4,6 +4,10 @@ import sys
 import os
 import json
 import glob
+from convert import convert_videos
+
+MIN_SCORE = -9999
+MAX_TRACK_ID = 10000
 
 class Joint:
     def __init__(self):
@@ -362,7 +366,6 @@ def removeRectsWithoutPoints(rects):
   rects = [rects[ridx] for ridx in idxsPr]
   return rects
 
-
 def load_data_dir(argv):
 
   gt_dir, pred_dir, mode = process_arguments(argv)
@@ -374,11 +377,12 @@ def load_data_dir(argv):
   gtFramesAll = []
   prFramesAll = []
 
-  MAX_TRACK_ID = 10000
   for i in range(len(filenames)):
     # load each annotation json file
     with open(filenames[i]) as data_file:
-      data = json.load(data_file)
+        data = json.load(data_file)
+    if (not "annolist" in data):
+        data = convert_videos(data)[0]
     gt = data["annolist"]
     for imgidx in range(len(gt)):
         gt[imgidx]["seq_id"] = i
@@ -397,7 +401,9 @@ def load_data_dir(argv):
 
     # load predictions
     with open(predFilename) as data_file:
-      data = json.load(data_file)
+        data = json.load(data_file)
+    if (not "annolist" in data):
+        data = convert_videos(data)[0]
     pr = data["annolist"]
     if (len(pr) <> len(gt)):
         raise Exception('# prediction frames %d <> # GT frames %d for %s' % (len(pr),len(gt),predFilename))
@@ -500,8 +506,13 @@ def assignGTmulti(gtFrames, prFrames, distThresh):
                 # predicted joint in LSP format
                 ppPr = getPointGTbyID(pointsPr, i)
                 if len(ppPr) > 0:
-                    assert("score" in ppPr.keys() and "keypoint score is missing")
-                    score[ridxPr, i] = ppPr["score"][0]
+                    if not ("score" in ppPr.keys()):
+                        # use minimum score if predicted score is missing
+                        if (imgidx == 0):
+                            print('WARNING: prediction score is missing. Setting fallback score={}'.format(MIN_SCORE))
+                        score[ridxPr, i] = MIN_SCORE
+                    else:
+                        score[ridxPr, i] = ppPr["score"][0]
                     hasPr[ridxPr, i] = True
 
         if len(prFrames[imgidx]["annorect"]) and len(gtFrames[imgidx]["annorect"]):

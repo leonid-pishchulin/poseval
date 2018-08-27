@@ -603,6 +603,23 @@ def cli(in_fp, out_fp="converted"):
         os.unlink(unzip_dir)
     LOGGER.info("Done.")
 
+def convert_videos(track_data):
+    """Convert between PoseTrack18 and PoseTrack17 format."""
+    if "annolist" in track_data.keys():
+        old_to_new = True
+        LOGGER.info("Detected PoseTrack17 format. Converting to 2018...")
+    else:
+        old_to_new = False
+        assert "images" in track_data.keys(), "Unknown image format. :("
+        LOGGER.info("Detected PoseTrack18 format. Converting to 2017...")
+
+    if (old_to_new):
+        videos = Video.from_old(track_data)
+        videos_converted = [v.to_new() for v in videos]
+    else:
+        videos = Video.from_new(track_data)
+        videos_converted = [v.to_old() for v in videos]
+    return videos_converted
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
