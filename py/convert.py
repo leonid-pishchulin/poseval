@@ -129,17 +129,21 @@ class Video:
     def to_old(self):
         """Return a dictionary representation for the PoseTrack17 format."""
         res = {"annolist": []}
-        last_name = ""
         for image in self.frames:
+            elem = {}
+            im_rep, ir_list, imgnum = image.to_old()
+            elem["image"] = [im_rep]
+            elem["imgnum"] = [imgnum]
+            if ir_list:
+                elem["ignore_regions"] = ir_list
+            elem["annorect"] = []
             for person in image.people:
-                elem = {}
-                elem["image"] = [image.to_old()]
-                if elem["image"][0]["name"] == last_name:
-                    res["annolist"][-1]["annorect"].append(person.to_old())
-                else:
-                    last_name = elem["image"][0]["name"]
-                    elem["annorect"] = [person.to_old()]
-                    res["annolist"].append(elem)
+                elem["annorect"].append(person.to_old())
+            if image.people:
+                elem['is_labeled'] = [1]
+            else:
+                elem['is_labeled'] = [0]
+            res["annolist"].append(elem)
         return res
 
     @classmethod
@@ -180,25 +184,22 @@ class Video:
         for lm_idx, lm_name in enumerate(POSETRACK18_LM_NAMES):
             assert lm_idx in conversion_table, "Landmark `%s` not found." % (lm_name)
         videos = []
-        for person_info in track_data["annotations"]:
-            image_id = person_info["image_id"]
-            if image_id in image_id_to_can_info:
-                image = image_id_to_can_info[image_id]
+        for image_id in [image["id"] for image in track_data["images"]]:
+            image = Image.from_new(track_data, image_id)
+            video_id = path.basename(path.dirname(image.posetrack_filename)).split(
+                "_"
+            )[0]
+            if video_id in video_id_to_video.keys():
+                video = video_id_to_video[video_id]
             else:
-                image = Image.from_new(track_data, image_id)
-                video_id = path.basename(path.dirname(image.posetrack_filename)).split(
-                    "_"
-                )[0]
-                #  video_id = video_id_str[1:-3]
-                if video_id in video_id_to_video.keys():
-                    video = video_id_to_video[video_id]
-                else:
-                    video = Video(video_id)
-                    video_id_to_video[video_id] = video
-                    videos.append(video)
-                video.frames.append(image)
-                image_id_to_can_info[image_id] = image
-            image.people.append(Person.from_new(person_info, conversion_table))
+                video = Video(video_id)
+                video_id_to_video[video_id] = video
+                videos.append(video)
+            video.frames.append(image)
+            for person_info in track_data["annotations"]:
+                if person_info["image_id"] != image_id:
+                    continue
+                image.people.append(Person.from_new(person_info, conversion_table))
         return videos
 
 
@@ -276,10 +277,15 @@ class Person:
     def to_old(self):
         """Return a dictionary representation for the PoseTrack17 format."""
         keypoints = []
-        points = []
         for landmark_info in self.landmarks:
-            # Skip all the (0, 0) keypoints
-            if landmark_info["x"] <= 0 and landmark_info["y"] <= 0:
+            if (
+                landmark_info["x"] == 0
+                and landmark_info["y"] == 0
+                and "is_visible" in landmark_info.keys()
+                and landmark_info["is_visible"] == 0
+            ):
+                # The points in new format are stored like this if they're unannotated.
+                # Skip in that case.
                 continue
             point = {
                 "id": [landmark_info["id"]],
@@ -290,10 +296,9 @@ class Person:
                 point["score"] = [landmark_info["score"]]
             if "is_visible" in landmark_info.keys():
                 point["is_visible"] = [landmark_info["is_visible"]]
-            points.append(point)
-        if points:
-            keypoints.append({"point": points})
-        ret = {"track_id": [self.track_id], "annopoints": keypoints}
+            keypoints.append(point)
+        # ret = {"track_id": [self.track_id], "annopoints": keypoints}
+        ret = {"track_id": [self.track_id], "annopoints": [{'point': keypoints}]}
         if self.rect_head:
             ret["x1"] = [self.rect_head["x1"]]
             ret["x2"] = [self.rect_head["x2"]]
@@ -388,10 +393,12 @@ class Person:
             person.rect = rect
         except KeyError:
             person.rect = None
-        person.score = []
+        if "score" in person_info.keys():
+            person.score = person_info["score"]
         try:
-            person.score = person_info["scores"]
+            landmark_scores = person_info["scores"]
         except KeyError:
+            landmark_scores = None
             if not SCORE_WARNING_EMITTED:
                 LOGGER.warning("No landmark scoring information found!")
                 LOGGER.warning("This will not be a valid submission file!")
@@ -402,15 +409,15 @@ class Person:
         ):
             landmark_idx_can = conversion_table[landmark_idx]
             if landmark_idx_can is not None:
-                person.landmarks.append(
-                    {
-                        "y": landmark_info[1],
-                        "x": landmark_info[0],
-                        "id": landmark_idx_can,
-                        "is_visible": landmark_info[2],
-                        "score": person.score[landmark_idx] if len(person.score) > 0 else -9999
-                    }
-                )
+                lm_info = {
+                    "y": landmark_info[1],
+                    "x": landmark_info[0],
+                    "id": landmark_idx_can,
+                    "is_visible": landmark_info[2],
+                }
+                if landmark_scores:
+                    lm_info["score"] = landmark_scores[landmark_idx]
+                person.landmarks.append(lm_info)
         return person
 
 
@@ -457,8 +464,10 @@ class Image:
                 for x_val, y_val in zip(plist_x, plist_y):
                     r_list.append({"x": [x_val], "y": [y_val]})
                 ir_list.append({"point": r_list})
-            ret["ignore_regions"] = ir_list
-        return ret
+        else:
+            ir_list = None
+        imgnum = int(path.basename(self.posetrack_filename).split(".")[0]) + 1
+        return ret, ir_list, imgnum
 
     @classmethod
     def from_old(cls, json_data):
@@ -505,7 +514,6 @@ class Image:
         posetrack_filename = image_info["file_name"]
         # license, coco_url, height, width, date_capture, flickr_url, id are lost.
         old_seq_fp = path.basename(path.dirname(posetrack_filename))
-        # 0-based indexing
         old_frame_id = int(path.basename(posetrack_filename).split(".")[0])
         frame_id = posetrack18_fname2id(old_seq_fp, old_frame_id)
         image = Image(posetrack_filename, frame_id)
@@ -613,5 +621,6 @@ def convert_videos(track_data):
         videos_converted = [v.to_old() for v in videos]
     return videos_converted
 
-logging.basicConfig(level=logging.DEBUG)
-#cli()  # pylint: disable=no-value-for-parameter
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    cli()  # pylint: disable=no-value-for-parameter
