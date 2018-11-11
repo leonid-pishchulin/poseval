@@ -21,7 +21,7 @@ $ cd poseval/py && export PYTHONPATH=$PWD/../py-motmetrics:$PYTHONPATH
 ```
 ## Data preparation
 
-Evaluation requires ground truth (GT) annotations available at [PoseTrack](https://posetrack.net) and  your method's predictions. Both GT annotations and your predictions must be saved in json format. Following GT annotations, predictions must be stored per sequence using the same structure as GT annotations, and have the same filename as GT annotations. Example of json prediction structure:
+Evaluation requires ground truth (GT) annotations available at [PoseTrack](https://posetrack.net) and  your method's predictions. Both GT annotations and your predictions must be saved in json format. Following GT annotations, predictions must be stored per sequence, for each frame of the sequence, using the same structure as GT annotations, and have the same filename as GT annotations. For evaluation on Posetrack 2017, predictions have to follow Posetrack 2017 annotation format, while for evaluation on Posetrack 2018 corresponding 2018 format should be used. Example of json prediction structure for Posetrack 2017 format:
 ```
 {
    "annolist": [
@@ -61,6 +61,7 @@ Evaluation requires ground truth (GT) annotations available at [PoseTrack](https
 }
 ```
 Note: values of `track_id` must integers from the interval [0, 999]. 
+For example annotation format of Posetrack 2018 please refer to the corresponding GT annotations.
 
 We provide a possibility to convert a Matlab structure into json format.
 ```
