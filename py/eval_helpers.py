@@ -408,11 +408,17 @@ def load_data_dir(argv):
     if (len(pr) <> len(gt)):
         raise Exception('# prediction frames %d <> # GT frames %d for %s' % (len(pr),len(gt),predFilename))
     for imgidx in range(len(pr)):
+        track_id_frame = []
         for ridxPr in range(len(pr[imgidx]["annorect"])):
             if ("track_id" in pr[imgidx]["annorect"][ridxPr].keys()):
+                track_id = pr[imgidx]["annorect"][ridxPr]["track_id"][0]
+                track_id_frame += [track_id]
                 # adjust track_ids to make them unique across all sequences
-                assert(pr[imgidx]["annorect"][ridxPr]["track_id"][0] < MAX_TRACK_ID)
+                assert(track_id < MAX_TRACK_ID)
                 pr[imgidx]["annorect"][ridxPr]["track_id"][0] += i*MAX_TRACK_ID
+        track_id_frame_unique = np.unique(np.array(track_id_frame)).tolist()
+        if (len(track_id_frame) <> len(track_id_frame_unique)):
+            raise Exception('Non-unique tracklet IDs found in frame %s of prediction %s' % (pr[imgidx]["image"][0]["name"],predFilename))
     prFramesAll += pr
 
   gtFramesAll,prFramesAll = cleanupData(gtFramesAll,prFramesAll)
