@@ -56,7 +56,7 @@ def computeMetrics(gtFramesAll, motAll, outputDir, bSaveAll, bSaveSeq):
     names['15'] = 'total'
 
     for si in range(nSeq):
-        print "seqidx: %d/%d" % (si+1,nSeq)
+        print("seqidx: %d/%d" % (si+1,nSeq))
 
         # init per-joint metrics accumulator
         accAll = {}
@@ -67,7 +67,7 @@ def computeMetrics(gtFramesAll, motAll, outputDir, bSaveAll, bSaveSeq):
         imgidxs = np.argwhere(seqidxs == seqidxsUniq[si])
         imgidxs = imgidxs[:-1].copy()
         seqName = gtFramesAll[imgidxs[0,0]]["seq_name"]
-        print seqName
+        print(seqName)
         # create an accumulator that will be updated during each frame
         # iterate over frames
         for j in range(len(imgidxs)):
@@ -146,7 +146,7 @@ def computeMetrics(gtFramesAll, motAll, outputDir, bSaveAll, bSaveSeq):
             metricsSeq['names'] = names
 
             filename = outputDir + '/' + seqName + '_MOT_metrics.json'
-            print 'saving results to', filename
+            print('saving results to', filename)
             eval_helpers.writeJson(metricsSeq,filename)
 
     # compute final metrics per joint for all sequences
@@ -195,7 +195,7 @@ def computeMetrics(gtFramesAll, motAll, outputDir, bSaveAll, bSaveSeq):
         metricsFin['names'] = names
 
         filename = outputDir + '/total_MOT_metrics.json'
-        print 'saving results to', filename
+        print('saving results to', filename)
         eval_helpers.writeJson(metricsFin,filename)
 
     return metricsFinAll
