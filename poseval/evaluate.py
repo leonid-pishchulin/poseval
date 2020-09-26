@@ -4,11 +4,11 @@ import sys
 import numpy as np
 import argparse
 
-from evaluateAP import evaluateAP
-from evaluateTracking import evaluateTracking
+from .evaluateAP import evaluateAP
+from .evaluateTracking import evaluateTracking
 
-import eval_helpers
-from eval_helpers import Joint
+from . import eval_helpers
+from .eval_helpers import Joint
 
 def parseArgs():
 

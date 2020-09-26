@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """Convert between COCO and PoseTrack2017 format."""
-# pylint: disable=too-many-branches, too-many-locals, bad-continuation, unsubscriptable-object
 from __future__ import print_function
 
 import json
@@ -12,7 +11,7 @@ import click
 import numpy as np
 import tqdm
 
-from posetrack18_id2fname import posetrack18_fname2id, posetrack18_id2fname
+from .posetrack18_id2fname import posetrack18_fname2id, posetrack18_id2fname
 
 LOGGER = logging.getLogger(__name__)
 POSETRACK18_LM_NAMES_COCO_ORDER = [

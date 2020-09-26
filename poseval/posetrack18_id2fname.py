@@ -1616,14 +1616,14 @@ def seqtype2idx(seqtype):
 
 
 def posetrack18_id2fname(image_id):
-    """Generates filename given image id 
+    """Generates filename given image id
 
     Args:
-      id: integer in the format TSSSSSSFFFF, 
+      id: integer in the format TSSSSSSFFFF,
           T encodes the sequence source (1: 'mpii', 2: 'bonn', 3: 'mpiinew')
           SSSSSS is 6-digit index of the sequence
-          FFFF is 4-digit index of the image frame 
-          
+          FFFF is 4-digit index of the image frame
+
     Returns:
       name of the video sequence
     """
@@ -1649,7 +1649,7 @@ def posetrack18_id2fname(image_id):
 
 
 def posetrack18_fname2id(fname, frameidx):
-    """Generates image id 
+    """Generates image id
 
     Args:
       fname: name of the PoseTrack sequence

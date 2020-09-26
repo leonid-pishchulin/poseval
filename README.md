@@ -1,3 +1,42 @@
+# Poseval
+
+Created by Leonid Pishchulin.
+Adapted by Sven Kreiss.
+
+Install directly from GitHub:
+
+```
+pip install https://github.com/svenkreiss/poseval.git
+```
+
+Install from a local clone:
+
+```
+git clone https://github.com/svenkreiss/poseval.git
+cd poseval
+pip install -e .  # install the local package ('.') in editable mode ('-e')
+```
+
+Changes:
+
+* Python 3
+* uses latest `motmetrics` from PyPI (much(!!!) faster); removed git submodule py-motmetrics
+
+Test command with small test data:
+
+```sh
+python -m poseval.evaluate \
+    --groundTruth test_data/gt/ \
+    --predictions test_data/pred/ \
+    --evalPoseTracking \
+    --evalPoseEstimation \
+    --saveEvalPerSequence
+```
+
+Lint: `pylint poseval`.
+
+---
+
 # Evaluation of Multi-Person Pose Estimation and Tracking
 
 Created by Leonid Pishchulin
@@ -60,7 +99,7 @@ Evaluation requires ground truth (GT) annotations available at [PoseTrack](https
    ]
 }
 ```
-Note: values of `track_id` must integers from the interval [0, 999]. 
+Note: values of `track_id` must integers from the interval [0, 999].
 For example annotation format of Posetrack 2018 please refer to the corresponding GT annotations.
 
 We provide a possibility to convert a Matlab structure into json format.
@@ -83,7 +122,7 @@ Multiple Object Tracking (MOT) metrics [2] are used for evaluation of video-base
 
 ## Evaluation (local)
 
-Evaluation code has been tested in Linux and Ubuntu OS. Evaluation takes as input path to directory with GT annotations and path to directory with predictions. See "Data preparation" for details on prediction format. 
+Evaluation code has been tested in Linux and Ubuntu OS. Evaluation takes as input path to directory with GT annotations and path to directory with predictions. See "Data preparation" for details on prediction format.
 
 ```
 $ git clone https://github.com/leonid-pishchulin/poseval.git --recursive
@@ -105,7 +144,7 @@ In order to evaluate using evaluation server, zip your directory containing json
 
 [1] DeepCut: Joint Subset Partition and Labeling for Multi Person Pose Estimation. L. Pishchulin, E. Insafutdinov, S. Tang, B. Andres, M. Andriluka, P. Gehler, and B. Schiele. In CVPR'16
 
-[2] Evaluating multiple object tracking performance: the CLEAR MOT metrics. K. Bernardin and R. Stiefelhagen. EURASIP J. Image Vide.'08 
+[2] Evaluating multiple object tracking performance: the CLEAR MOT metrics. K. Bernardin and R. Stiefelhagen. EURASIP J. Image Vide.'08
 
 [3] 2D Human Pose Estimation: New Benchmark and State of the Art Analysis. M. Andriluka, L. Pishchulin, P. Gehler, and B. Schiele. In CVPR'14
 

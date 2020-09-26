@@ -36,4 +36,4 @@ ignored-modules=openpifpaf.functional,pycocotools
 
 # for pytorch: not-callable
 # for pytorch 1.6.0: abstract-method
-disable=missing-docstring,too-many-arguments,too-many-instance-attributes,too-many-locals,too-few-public-methods,not-callable,abstract-method,invalid-name,unused-variable,unused-import,superfluous-parens,line-too-long,wrong-import-order,too-many-nested-blocks,too-many-branches,too-many-statements,multiple-statements,bad-indentation,unnecessary-semicolon,consider-using-enumerate,unused-argument,len-as-condition
+disable=missing-docstring,too-many-arguments,too-many-instance-attributes,too-many-locals,too-few-public-methods,not-callable,abstract-method,invalid-name,unused-variable,unused-import,superfluous-parens,line-too-long,wrong-import-order,too-many-nested-blocks,too-many-branches,too-many-statements,multiple-statements,bad-indentation,unnecessary-semicolon,consider-using-enumerate,unused-argument,len-as-condition,import-outside-toplevel,too-many-lines
