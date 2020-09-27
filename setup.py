@@ -11,7 +11,7 @@ setup(
 
     install_requires=[
         'click',
-        'motmetrics',
+        'motmetrics>=1.2',
         'shapely',
         'tqdm',
     ],
