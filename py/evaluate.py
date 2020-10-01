@@ -25,36 +25,36 @@ def parseArgs():
 def main():
 
     args = parseArgs()
-    print args
+    print(args)
     argv = ['',args.groundTruth,args.predictions]
 
-    print "Loading data"
+    print("Loading data")
     gtFramesAll,prFramesAll = eval_helpers.load_data_dir(argv)
 
-    print "# gt frames  :", len(gtFramesAll)
-    print "# pred frames:", len(prFramesAll)
+    print("# gt frames  :", len(gtFramesAll))
+    print("# pred frames:", len(prFramesAll))
 
     if (not os.path.exists(args.outputDir)):
         os.makedirs(args.outputDir)
-        
+
     if (args.evalPoseEstimation):
         #####################################################
         # evaluate per-frame multi-person pose estimation (AP)
 
         # compute AP
-        print "Evaluation of per-frame multi-person pose estimation"
+        print("Evaluation of per-frame multi-person pose estimation")
         apAll,preAll,recAll = evaluateAP(gtFramesAll,prFramesAll,args.outputDir,True,args.saveEvalPerSequence)
 
         # print AP
-        print "Average Precision (AP) metric:"
+        print("Average Precision (AP) metric:")
         eval_helpers.printTable(apAll)
 
     if (args.evalPoseTracking):
         #####################################################
         # evaluate multi-person pose tracking in video (MOTA)
-        
+
         # compute MOTA
-        print "Evaluation of video-based  multi-person pose tracking"    
+        print("Evaluation of video-based  multi-person pose tracking")
         metricsAll = evaluateTracking(gtFramesAll,prFramesAll,args.outputDir,True,args.saveEvalPerSequence)
 
         metrics = np.zeros([Joint().count + 4,1])
@@ -65,8 +65,8 @@ def main():
         metrics[Joint().count+3,0] = metricsAll['rec'][0,Joint().count]
 
         # print AP
-        print "Multiple Object Tracking (MOT) metrics:"
+        print("Multiple Object Tracking (MOT) metrics:")
         eval_helpers.printTable(metrics,motHeader=True)
 
 if __name__ == "__main__":
-   main()
+    main()

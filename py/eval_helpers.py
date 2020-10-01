@@ -67,7 +67,7 @@ def getPointGTbyID(points,pidx):
 
     point = []
     for i in range(len(points)):
-        if (points[i]["id"] != None and points[i]["id"][0] == pidx): # if joint id matches
+        if (points[i]["id"] is not None and points[i]["id"][0] == pidx): # if joint id matches
             point = points[i]
             break
 
@@ -155,17 +155,17 @@ def printTable(vals,motHeader=False):
         header = getMotHeader()
     else:
         header = getHeader()
-    print header
-    print row
+    print(header)
+    print(row)
     return header+"\n", row+"\n"
 
 
 def printTableTracking(valsPerPart):
 
-    cum = getCum(vals)
+    cum = getCum(valsPerPart)
     row = getFormatRow(cum)
-    print getHeader()
-    print row
+    print(getHeader())
+    print(row)
     return getHeader()+"\n", row+"\n"
 
 
@@ -214,34 +214,28 @@ def get_data_dir():
   dataDir = "./"
   return dataDir
 
-def help(msg=''):
-  sys.stderr.write(msg+'\n')
-  exit()
-
 def process_arguments(argv):
 
   mode = 'multi'
 
   if len(argv) > 3:
     mode   = str.lower(argv[3])
-  elif len(argv)<3 or len(argv)>4:
-    help()
 
   gt_file = argv[1]
   pred_file = argv[2]
 
   if not os.path.exists(gt_file):
-    help('Given ground truth directory does not exist!\n')
+    raise Exception('Given ground truth directory does not exist!')
 
   if not os.path.exists(pred_file):
-    help('Given prediction directory does not exist!\n')
+    raise Exception('Given prediction directory does not exist!')
 
   return gt_file, pred_file, mode
 
 def process_arguments_server(argv):
   mode = 'multi'
 
-  print len(argv)
+  print(len(argv))
   assert len(argv) == 10, "Wrong number of arguments"
 
   gt_dir = argv[1]
@@ -405,7 +399,7 @@ def load_data_dir(argv):
     if (not "annolist" in data):
         data = convert_videos(data)[0]
     pr = data["annolist"]
-    if (len(pr) <> len(gt)):
+    if len(pr) != len(gt):
         raise Exception('# prediction frames %d <> # GT frames %d for %s' % (len(pr),len(gt),predFilename))
     for imgidx in range(len(pr)):
         track_id_frame = []
@@ -417,7 +411,7 @@ def load_data_dir(argv):
                 assert(track_id < MAX_TRACK_ID)
                 pr[imgidx]["annorect"][ridxPr]["track_id"][0] += i*MAX_TRACK_ID
         track_id_frame_unique = np.unique(np.array(track_id_frame)).tolist()
-        if (len(track_id_frame) <> len(track_id_frame_unique)):
+        if len(track_id_frame) != len(track_id_frame_unique):
             raise Exception('Non-unique tracklet IDs found in frame %s of prediction %s' % (pr[imgidx]["image"][0]["name"],predFilename))
     prFramesAll += pr
 
@@ -580,8 +574,8 @@ def assignGTmulti(gtFrames, prFrames, distThresh):
                 mot[i] = {}
 
             for i in range(nJoints):
-                ridxsGT = np.argwhere(hasGT[:,i] == True); ridxsGT = ridxsGT.flatten().tolist()
-                ridxsPr = np.argwhere(hasPr[:,i] == True); ridxsPr = ridxsPr.flatten().tolist()
+                ridxsGT = np.argwhere(hasGT[:,i]).flatten().tolist()
+                ridxsPr = np.argwhere(hasPr[:,i]).flatten().tolist()
                 mot[i]["trackidxGT"] = [trackidxGT[idx] for idx in ridxsGT]
                 mot[i]["trackidxPr"] = [trackidxPr[idx] for idx in ridxsPr]
                 mot[i]["ridxsGT"] = np.array(ridxsGT)

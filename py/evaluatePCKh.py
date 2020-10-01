@@ -12,17 +12,17 @@ def computeDist(gtFrames,prFrames):
     distAll = {}
     for pidx in range(nJoints):
         distAll[pidx] = np.zeros([0,0])
-        
+
     for imgidx in range(len(gtFrames)):
         # ground truth
         gtFrame = gtFrames[imgidx]
         # prediction
         detFrame = prFrames[imgidx]
-        if (gtFrames[imgidx]["annorect"] != None):
+        if (gtFrames[imgidx]["annorect"] is not None):
             for ridx in range(len(gtFrames[imgidx]["annorect"])):
                 rectGT = gtFrames[imgidx]["annorect"][ridx]
                 rectPr = prFrames[imgidx]["annorect"][ridx]
-                if ("annopoints" in rectGT.keys() and rectGT["annopoints"] != None):
+                if ("annopoints" in rectGT.keys() and rectGT["annopoints"] is not None):
                     pointsGT = rectGT["annopoints"][0]["point"]
                     pointsPr = rectPr["annopoints"][0]["point"]
                     for pidx in range(len(pointsGT)):
@@ -30,8 +30,8 @@ def computeDist(gtFrames,prFrames):
                         idxGT = pointsGT[pidx]["id"][0]
                         p = eval_helpers.getPointGTbyID(pointsPr,idxGT)
                         if (len(p) > 0 and
-                            (type(p["x"][0]) == int or type(p["x"][0]) == float) and
-                            (type(p["y"][0]) == int or type(p["y"][0]) == float)):
+                            isinstance(p["x"][0], (int, float)) and
+                            isinstance(p["y"][0], (int, float))):
                             pointPr = [p["x"][0],p["y"][0]]
                             # compute distance between GT and prediction
                             d = np.linalg.norm(np.subtract(pointGT,pointPr))
@@ -59,14 +59,14 @@ def computePCK(distAll,distThresh):
         nCorrect += len(idxs)
         nTotal   += len(distAll[pidx])
     pckAll[len(distAll),0] = 100.0*nCorrect/nTotal
-    
+
     return pckAll
 
 
 def evaluatePCKh(gtFramesAll,prFramesAll):
 
     distThresh = 0.5
-    
+
     # compute distances
     distAll = computeDist(gtFramesAll,prFramesAll)
 

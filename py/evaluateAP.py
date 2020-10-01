@@ -52,7 +52,7 @@ def evaluateAP(gtFramesAll, prFramesAll, outputDir, bSaveAll=True, bSaveSeq=Fals
 
     if (bSaveSeq):
         for si in range(nSeq):
-            print "seqidx: %d/%d" % (si+1,nSeq)
+            print("seqidx: %d/%d" % (si+1,nSeq))
 
             # extract frames IDs for the sequence
             imgidxs = np.argwhere(seqidxs == seqidxsUniq[si])
@@ -69,7 +69,7 @@ def evaluateAP(gtFramesAll, prFramesAll, outputDir, bSaveAll=True, bSaveSeq=Fals
             metricsSeq = {'ap': ap.flatten().tolist(), 'pre': pre.flatten().tolist(), 'rec': rec.flatten().tolist(), 'names': names}
 
             filename = outputDir + '/' + seqName + '_AP_metrics.json'
-            print 'saving results to', filename
+            print('saving results to', filename)
             eval_helpers.writeJson(metricsSeq,filename)
 
     # assign predicted poses to GT poses
@@ -80,7 +80,7 @@ def evaluateAP(gtFramesAll, prFramesAll, outputDir, bSaveAll=True, bSaveSeq=Fals
     if (bSaveAll):
         metrics = {'ap': apAll.flatten().tolist(), 'pre': preAll.flatten().tolist(), 'rec': recAll.flatten().tolist(),  'names': names}
         filename = outputDir + '/total_AP_metrics.json'
-        print 'saving results to', filename
+        print('saving results to', filename)
         eval_helpers.writeJson(metrics,filename)
 
     return apAll, preAll, recAll

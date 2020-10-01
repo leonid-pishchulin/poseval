@@ -1,0 +1,4 @@
+click
+motmetrics
+shapely
+tqdm
