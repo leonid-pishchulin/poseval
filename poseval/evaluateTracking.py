@@ -3,8 +3,8 @@ import json
 import os
 import sys
 
-import eval_helpers
-from eval_helpers import Joint
+from . import eval_helpers
+from .eval_helpers import Joint
 import motmetrics as mm
 
 

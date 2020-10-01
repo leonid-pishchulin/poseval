@@ -4,7 +4,7 @@ import sys
 import os
 import json
 import glob
-from convert import convert_videos
+from .convert import convert_videos
 
 MIN_SCORE = -9999
 MAX_TRACK_ID = 10000
